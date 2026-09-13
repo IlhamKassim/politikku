@@ -99,6 +99,8 @@ node_modules/
 # Generated learn pages (migrated to python renderers)
 public/learn/*.html
 public/ms/learn/*.html
+public/learn/how-a-vote-works/
+public/ms/learn/how-a-vote-works/
 public/learn/prototypes/
 
 # public/projection/<year>/<month>/<day>.html (#55) is also tracked,

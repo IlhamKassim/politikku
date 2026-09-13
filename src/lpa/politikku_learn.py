@@ -5,6 +5,7 @@ from pathlib import Path
 from lpa.config import load_election_status
 from lpa.domain import ElectionStatus
 from lpa.politikku_shell import Language, render_shell, t
+from lpa.politikku_vote_path import write_vote_path_pages
 
 _LEARN_BASE_CSS = """
   .pk-learn-container { max-width: 720px; margin: 0 auto; padding: 2rem var(--gutter-mobile); }
@@ -1442,6 +1443,9 @@ def main(*, output_dir: str = "public") -> None:
             out_path = lang_dir / page_name
             out_path.write_text(builder(lang, today, status), encoding="utf-8")
             print(f"Wrote {out_path} ({out_path.stat().st_size} bytes)")
+
+    for path in write_vote_path_pages(output_dir=args.output_dir):
+        print(f"Wrote {path} ({path.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":

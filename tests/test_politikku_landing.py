@@ -113,6 +113,7 @@ def test_observatory_links_into_the_current_platform():
     assert 'href="/politicians/"' in page
     assert 'href="/projection/"' in page
     assert 'href="/learn/glossary.html"' in page
+    assert 'href="/learn/how-a-vote-works/"' in page
     assert "Explore Suara" not in page
 
 

@@ -404,6 +404,19 @@ def _extra_source_rows(language: Language) -> str:
     is_ms = language is Language.MS
     rows = [
         (
+            "learn/how-a-vote-works/",
+            "→",
+            (
+                "How a vote works",
+                "Ke mana undi pergi",
+            ),
+            (
+                "Street to Seat to DUN — then how Seats become a government.",
+                "Jalan ke Kerusi ke DUN — kemudian bagaimana Kerusi menjadi kerajaan.",
+            ),
+            ("READ", "BACA"),
+        ),
+        (
             "dewan/",
             "▣",
             (
@@ -473,6 +486,13 @@ def _observatory_header(language: Language) -> str:
     en_class = "on" if language is Language.EN else ""
     ms_class = "on" if language is Language.MS else ""
     home_label = t(language, "PolitikKu home", "Laman utama PolitikKu")
+    vote_link = (
+        f'<a href="{html.escape(route(language, "learn/how-a-vote-works/"))}">'
+        f"{html.escape(t(language, 'How a vote works', 'Ke mana undi pergi'))} "
+        '<span aria-hidden="true"><svg class="ico-arrow" viewBox="0 0 16 16" focusable="false">'
+        '<path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>'
+    )
     ge16_link = (
         f'<a href="{html.escape(route(language, "pru16/"))}">'
         f"{html.escape(t(language, 'GE16', 'PRU16'))} "
@@ -487,7 +507,7 @@ def _observatory_header(language: Language) -> str:
     )
     return f"""<header class="nav wrap">
 <a class="brand" href="{html.escape(home)}" aria-label="{html.escape(home_label)}"><svg viewBox="0 0 32 32" width="28" aria-hidden="true"><path d="M3 28V4h8v24M15 28V4h7l7 8-7 8h-7" fill="none" stroke="currentColor" stroke-width="3"/></svg>PolitikKu<span class="brand-small">THE CIVIC OBSERVATORY</span></a>
-<nav class="nav-links" id="navigation" aria-label="{html.escape(t(language, "Main navigation", "Navigasi utama"))}"><a href="#perspective">{html.escape(t(language, "The perspective", "Perspektif"))}</a><a href="#chamber">{html.escape(t(language, "The 222 Seats", "222 kerusi"))}</a><a href="#find" class="nav-cta">{html.escape(t(language, "Find your Seat", "Cari kerusi anda"))} <span aria-hidden="true"><svg class="ico-arrow" viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>{ge16_link}{analyst_link}</nav>
+<nav class="nav-links" id="navigation" aria-label="{html.escape(t(language, "Main navigation", "Navigasi utama"))}"><a href="#perspective">{html.escape(t(language, "The perspective", "Perspektif"))}</a><a href="#chamber">{html.escape(t(language, "The 222 Seats", "222 kerusi"))}</a><a href="#find" class="nav-cta">{html.escape(t(language, "Find your Seat", "Cari kerusi anda"))} <span aria-hidden="true"><svg class="ico-arrow" viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>{vote_link}{ge16_link}{analyst_link}</nav>
 <div class="obs-lang" role="group" aria-label="Language"><a class="{en_class}" href="/"{' aria-current="page"' if language is Language.EN else ""} data-pk-set-lang="en">EN</a><a class="{ms_class}" href="/ms/"{' aria-current="page"' if language is Language.MS else ""} data-pk-set-lang="ms">BM</a></div>
 <button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false">{html.escape(t(language, "Menu", "Menu"))}</button>
 </header>"""

@@ -145,6 +145,7 @@ def rendered_site(tmp_path_factory) -> Path:
     _write(root, "favicon.ico", "")
     from lpa.config import load_election_status
     from lpa.politikku_learn import build_coalitions_page, build_glossary_page, build_process_page
+    from lpa.politikku_vote_path import build_vote_path_page
 
     status = load_election_status()
     for lang in [Language.EN, Language.MS]:
@@ -163,6 +164,11 @@ def rendered_site(tmp_path_factory) -> Path:
             root,
             f"{lang_prefix}learn/ge16-process.html",
             build_process_page(lang, date(2026, 1, 1), status),
+        )
+        _write(
+            root,
+            f"{lang_prefix}learn/how-a-vote-works/index.html",
+            build_vote_path_page(lang, date(2026, 1, 1), status),
         )
 
     from lpa.politikku_pru16 import pru16_model, render_pru16_page
@@ -352,6 +358,15 @@ def test_the_language_toggle_on_every_page_reaches_the_other_language(rendered_s
             # Its own header, like the landing page: one EN/BM pair, to the
             # two Analyst pages.
             assert set(toggles) == {"/analyst/", "/ms/analyst/"}, page_path
+            for link in toggles:
+                assert _resolve(rendered_site, link).is_file(), (page_path, link)
+            continue
+        if page_path.parent.name == "how-a-vote-works":
+            # Scrollcraft walkthrough: chrome=False, own header, own pair.
+            assert set(toggles) == {
+                "/learn/how-a-vote-works/",
+                "/ms/learn/how-a-vote-works/",
+            }, page_path
             for link in toggles:
                 assert _resolve(rendered_site, link).is_file(), (page_path, link)
             continue

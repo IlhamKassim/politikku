@@ -169,6 +169,17 @@ NAV_LINKS: tuple[NavLink, ...] = (
         ),
     ),
     NavLink(
+        "How a vote works",
+        "Ke mana undi pergi",
+        "learn/how-a-vote-works/",
+        "vote-path",
+        icon_svg=(
+            '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+            '<path d="M4 12h9"/><path d="m10 6 6 6-6 6"/><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>'
+        ),
+    ),
+    NavLink(
         "Glossary",
         "Glosari",
         "learn/glossary.html",
@@ -679,6 +690,7 @@ def render_methodology_footer(
     learn_links = "".join(
         f'\n    <a class="pk-footer-link" href="{html.escape(route(language, page))}">{label} →</a>'
         for page, label in (
+            ("learn/how-a-vote-works/", t(language, "How a vote works", "Ke mana undi pergi")),
             ("learn/glossary.html", t(language, "Glossary", "Glosari")),
             ("learn/coalitions.html", t(language, "Coalitions", "Gabungan")),
             ("learn/ge16-process.html", t(language, "GE16 Process", "Proses PRU16")),
