@@ -1,0 +1,8 @@
+{
+  "name": "politikku-scrollcraft-workspace",
+  "private": true,
+  "description": "Local verification dependencies for Scrollcraft builds.",
+  "devDependencies": {
+    "playwright-core": "^1.58.2"
+  }
+}
