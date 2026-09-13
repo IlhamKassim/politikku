@@ -546,6 +546,7 @@ _OBSERVATORY_COPY_MS = {
     "Five digits. Your place in the story.": "Lima angka. Tempat anda dalam cerita.",
     "Or explore all 222 Seats": "Atau terokai semua 222 kerusi",
     "Made for a more informed Malaysia.": "Untuk Malaysia yang lebih berpengetahuan.",
+    "Supported by": "Disokong oleh",
     "Explore Suara": "Terokai peta",
     "Decorative artwork · Seat index snapshot: 26 August 2026": "Karya hiasan · Lookup menggunakan indeks Poskod → Seat yang disahkan",
 }
@@ -573,6 +574,7 @@ def _observatory_body(model: LandingModel | None, language: Language) -> str:
     # that pulls the 768px WebP fetches 86KB where the PNG was 2.2MB, and the
     # srcset stops silently pointing at nothing when a width is added.
     body = body.replace("assets/skyline", f"{_OBSERVATORY_ASSET_PREFIX}skyline")
+    body = body.replace("assets/krackeddevs.svg", f"{_OBSERVATORY_ASSET_PREFIX}krackeddevs.svg")
     body = body.replace("https://politikku.my/app/", APP_URL)
     body = body.replace("https://politikku.my/bills/", route(language, "bills/"))
     body = body.replace(
@@ -615,6 +617,7 @@ _OBSERVATORY_ASSETS = {
     "skyline-1024.webp": _OBSERVATORY_PAGE / "assets" / "skyline-1024.webp",
     "skyline-1280.webp": _OBSERVATORY_PAGE / "assets" / "skyline-1280.webp",
     "skyline-1536.webp": _OBSERVATORY_PAGE / "assets" / "skyline-1536.webp",
+    "krackeddevs.svg": _OBSERVATORY_PAGE / "assets" / "krackeddevs.svg",
     "icon.svg": _OBSERVATORY_PAGE / "icon.svg",
     "base.css": _OBSERVATORY_SHARED / "base.css",
     "sans.woff2": _OBSERVATORY_SHARED / "sans.woff2",

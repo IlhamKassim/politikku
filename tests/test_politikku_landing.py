@@ -95,7 +95,11 @@ def test_observatory_css_and_js_links_carry_their_files_fingerprint(tmp_path):
     build_and_write_landing_pages(tmp_path)
     for index in (tmp_path / "index.html", tmp_path / "ms" / "index.html"):
         links = re.findall(r'(?:href|src)="(/assets/observatory/[^"]+)"', index.read_text())
-        tagged = [link for link in links if not link.endswith((".woff2", ".png"))]
+        # Fonts and artwork are not fingerprinted: their bytes never change
+        # under the same name, so a cached copy is always the right copy.
+        tagged = [
+            link for link in links if not link.endswith((".woff2", ".png", "krackeddevs.svg"))
+        ]
         assert len(tagged) == 5, tagged
         for link in tagged:
             path, _, query = link.partition("?")
@@ -180,3 +184,37 @@ def test_every_hero_image_width_is_served_from_the_site_root(tmp_path):
             assert f"/assets/observatory/skyline-{width}.webp" in markup
         assert 'src="/assets/observatory/skyline.png"' in markup
         assert '"assets/skyline' not in markup
+
+
+def test_the_footer_credits_krackeddevs_in_both_languages(tmp_path):
+    """The wordmark is drawn in bright greens for a dark background, so it sits
+    on a dark chip inside the lime footer. Its path is rewritten to the site
+    root the same way the hero art is — a relative `assets/` path 404s on /ms/."""
+    build_and_write_landing_pages(tmp_path)
+
+    for page, label in (
+        (tmp_path / "index.html", "Supported by"),
+        (tmp_path / "ms" / "index.html", "Disokong oleh"),
+    ):
+        markup = page.read_text()
+        assert label in markup
+        assert 'href="https://krackeddevs.com/" target="_blank" rel="noopener"' in markup
+        assert 'src="/assets/observatory/krackeddevs.svg"' in markup
+        assert '"assets/krackeddevs.svg"' not in markup
+
+    assert (tmp_path / "assets" / "observatory" / "krackeddevs.svg").is_file()
+
+
+def test_the_supporter_sheen_is_gated_on_the_sites_motion_switch(tmp_path):
+    """`integrated.js` clears `js-motion` from the root both when a reader hits
+    "Pause motion" and when they have prefers-reduced-motion set. An animation
+    that isn't scoped to that class keeps running through either one."""
+    build_and_write_landing_pages(tmp_path)
+    css = (tmp_path / "assets" / "observatory" / "style.css").read_text()
+
+    for rule in re.findall(r"[^{}]*supporter-mark[^{}]*\{[^{}]*animation:[^{}]*\}", css):
+        assert rule.lstrip().startswith(".js-motion"), rule
+
+    # The reveal rule carries four classes; the hover rule has to match that
+    # scope or it silently loses and the sheen never replays on hover.
+    assert ".js-motion .supporter.is-in .supporter-mark:hover::after{" in css
