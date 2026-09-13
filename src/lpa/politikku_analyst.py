@@ -87,7 +87,7 @@ _HEADER_JS = """
 def _analyst_header(language: Language) -> str:
     """Reuse the homepage header: home anchors, and an EN/BM toggle that
     switches between the two Analyst pages rather than the two homepages."""
-    header = _observatory_header(language)
+    header = _observatory_header(language, home_sections=True)
     home = route(language, "")
 
     def to_analyst(match: re.Match[str]) -> str:

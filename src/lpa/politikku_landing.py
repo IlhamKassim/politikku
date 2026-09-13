@@ -481,7 +481,15 @@ def _extra_source_rows(language: Language) -> str:
     )
 
 
-def _observatory_header(language: Language) -> str:
+def _observatory_header(language: Language, *, home_sections: bool = False) -> str:
+    """The shared site header.
+
+    `home_sections` adds links to two sections of the landing page. They are
+    off by default because on the landing page itself they only scroll the
+    reader down a page they are already on, in a row of links that otherwise
+    go somewhere. From another page — /analyst/ — they are real navigation,
+    so that page asks for them.
+    """
     home = _ms_route(PAGE_PATH) if language is Language.MS else _en_route(PAGE_PATH)
     en_class = "on" if language is Language.EN else ""
     ms_class = "on" if language is Language.MS else ""
@@ -505,9 +513,15 @@ def _observatory_header(language: Language) -> str:
         f"{html.escape(t(language, 'Analyst', 'Penganalisis'))} "
         '<span aria-hidden="true"><svg class="ico-arrow" viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>'
     )
+    section_links = (
+        f'<a href="#perspective">{html.escape(t(language, "The perspective", "Perspektif"))}</a>'
+        f'<a href="#chamber">{html.escape(t(language, "The 222 Seats", "222 kerusi"))}</a>'
+        if home_sections
+        else ""
+    )
     return f"""<header class="nav wrap">
 <a class="brand" href="{html.escape(home)}" aria-label="{html.escape(home_label)}"><svg viewBox="0 0 32 32" width="28" aria-hidden="true"><path d="M3 28V4h8v24M15 28V4h7l7 8-7 8h-7" fill="none" stroke="currentColor" stroke-width="3"/></svg>PolitikKu<span class="brand-small">THE CIVIC OBSERVATORY</span></a>
-<nav class="nav-links" id="navigation" aria-label="{html.escape(t(language, "Main navigation", "Navigasi utama"))}"><a href="#perspective">{html.escape(t(language, "The perspective", "Perspektif"))}</a><a href="#chamber">{html.escape(t(language, "The 222 Seats", "222 kerusi"))}</a><a href="#find" class="nav-cta">{html.escape(t(language, "Find your Seat", "Cari kerusi anda"))} <span aria-hidden="true"><svg class="ico-arrow" viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>{vote_link}{ge16_link}{analyst_link}</nav>
+<nav class="nav-links" id="navigation" aria-label="{html.escape(t(language, "Main navigation", "Navigasi utama"))}">{section_links}<a href="#find" class="nav-cta">{html.escape(t(language, "Find your Seat", "Cari kerusi anda"))} <span aria-hidden="true"><svg class="ico-arrow" viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>{vote_link}{ge16_link}{analyst_link}</nav>
 <div class="obs-lang" role="group" aria-label="Language"><a class="{en_class}" href="/"{' aria-current="page"' if language is Language.EN else ""} data-pk-set-lang="en">EN</a><a class="{ms_class}" href="/ms/"{' aria-current="page"' if language is Language.MS else ""} data-pk-set-lang="ms">BM</a></div>
 <button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false">{html.escape(t(language, "Menu", "Menu"))}</button>
 </header>"""

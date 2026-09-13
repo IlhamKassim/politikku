@@ -218,3 +218,20 @@ def test_the_supporter_sheen_is_gated_on_the_sites_motion_switch(tmp_path):
     # The reveal rule carries four classes; the hover rule has to match that
     # scope or it silently loses and the sheen never replays on hover.
     assert ".js-motion .supporter.is-in .supporter-mark:hover::after{" in css
+
+
+def test_the_nav_only_lists_destinations_not_scroll_positions(tmp_path):
+    """ "The perspective" and "The 222 Seats" jumped to sections of the page the
+    reader was already on, sitting in a row of links that otherwise go
+    somewhere. The sections stay: /analyst/ deep-links back to both."""
+    build_and_write_landing_pages(tmp_path)
+
+    for page in (tmp_path / "index.html", tmp_path / "ms" / "index.html"):
+        body = page.read_text()
+        nav = re.search(r'<nav class="nav-links".*?</nav>', body, re.DOTALL)
+        assert nav, f"no nav in {page}"
+        hrefs = re.findall(r'href="([^"]+)"', nav.group(0))
+        # #find is the call to action, the one anchor that earns its place.
+        assert [h for h in hrefs if h.startswith("#")] == ["#find"], hrefs
+        assert 'id="perspective"' in body
+        assert 'id="chamber"' in body
