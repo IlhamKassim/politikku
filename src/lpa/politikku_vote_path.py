@@ -7,8 +7,11 @@ Decisions recorded from Ilham on 2026-09-13, after the Act 1 HITL samples:
 - Six acts. Act 6 is the long closer — YDPA and Dewan Negara get real space.
 - "Why they did it" is allowed when a source says why. We attribute. We do
   not invent a motive in this site's own voice.
-- Still off this page: a political compass, year-by-year Coalition seat
-  charts, a live legislature simulator.
+- On this page, after Act 4: year-by-year Seat charts (GE13–GE15, named
+  as the blocs that contested that year), a sourced political compass
+  (Wikipedia positions, not invented x/y scores), and a client-side
+  Dewan Rakyat simulator (222 Seats, Majority at 112). The simulator is
+  a teaching tool, not a live feed of today's house.
 - Always teach the exclusion: Kuala Lumpur, Labuan, and Putrajaya have no DUN.
 
 Parent map: #192. Copy ticket: #195.
@@ -31,11 +34,59 @@ POLITICS_WIKI = "https://en.wikipedia.org/wiki/Politics_of_Malaysia?action=raw"
 DUN_WIKI = "https://en.wikipedia.org/wiki/Dewan_Undangan_Negeri?action=raw"
 STATES_WIKI = "https://en.wikipedia.org/wiki/States_and_federal_territories_of_Malaysia?action=raw"
 ELECTIONS_WIKI = "https://en.wikipedia.org/wiki/Elections_in_Malaysia?action=raw"
+GE13_WIKI = "https://en.wikipedia.org/wiki/2013_Malaysian_general_election?action=raw"
+GE14_WIKI = "https://en.wikipedia.org/wiki/2018_Malaysian_general_election?action=raw"
 GE15_WIKI = "https://en.wikipedia.org/wiki/2022_Malaysian_general_election?action=raw"
+PH_WIKI = "https://en.wikipedia.org/wiki/Pakatan_Harapan?action=raw"
+PN_WIKI = "https://en.wikipedia.org/wiki/Perikatan_Nasional?action=raw"
+BN_WIKI = "https://en.wikipedia.org/wiki/Barisan_Nasional?action=raw"
+GPS_WIKI = "https://en.wikipedia.org/wiki/Gabungan_Parti_Sarawak?action=raw"
+GRS_WIKI = "https://en.wikipedia.org/wiki/Gabungan_Rakyat_Sabah?action=raw"
+
+_CHART_COLORS = {
+    "PH": "#d7263d",
+    "PN": "#15387c",
+    "BN": "#1f9bd6",
+    "GPS": "#b8332e",
+    "GRS": "#e8772e",
+    "WARISAN": "#16a085",
+    "PR": "#6b3fa0",
+    "GS": "#008900",
+    "OTHER": "#5d6b7d",
+}
+MAJORITY_SEATS = 112
+DEWAN_SEATS = 222
 
 
 def _claim(claim_id: str, cite: str, text: str) -> str:
     return f'<span data-claim id="{claim_id}" data-cite="{cite}">{text}</span>'
+
+
+def _stack_bar(segments: tuple[tuple[str, int, str], ...]) -> str:
+    parts: list[str] = []
+    for label, seats, color in segments:
+        if seats <= 0:
+            continue
+        width = 100 * seats / DEWAN_SEATS
+        parts.append(
+            f'<span class="stack-seg" style="width:{width:.2f}%;background:{color}" '
+            f'title="{label} {seats}"></span>'
+        )
+    tick = 100 * MAJORITY_SEATS / DEWAN_SEATS
+    return (
+        f'<div class="stack-bar" role="img" '
+        f'aria-label="Seat bars for {DEWAN_SEATS} Seats, Majority at {MAJORITY_SEATS}">'
+        f"{''.join(parts)}"
+        f'<i class="majority-tick" style="left:{tick:.2f}%"></i>'
+        f"</div>"
+    )
+
+
+def _legend_row(label: str, seats: int, color: str) -> str:
+    return (
+        f'<li><i class="swatch" style="background:{color}"></i>'
+        f"<b>{label}</b> <span>{seats}</span></li>"
+    )
 
 
 _SCROLL_CSS = """
@@ -224,6 +275,181 @@ _SCROLL_CSS = """
   }
   @media (prefers-reduced-motion: reduce) {
     .scene { min-height: 0; }
+  }
+  .year-charts, .compass-panel, .vote-sim {
+    margin-top: 28px;
+    display: grid;
+    gap: 16px;
+  }
+  .year-card, .compass-panel, .vote-sim {
+    padding: 20px 20px 18px;
+    border: 1px solid var(--line);
+    background: var(--paper-alt);
+  }
+  .year-card h3, .compass-panel h3, .vote-sim h3 {
+    font-size: 22px;
+    letter-spacing: -.02em;
+    margin: 8px 0 12px;
+  }
+  .stack-bar {
+    position: relative;
+    display: flex;
+    height: 36px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .stack-seg { display: block; height: 100%; }
+  .majority-tick {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    background: var(--caution);
+    pointer-events: none;
+  }
+  .bar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    list-style: none;
+    padding: 12px 0 0;
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .bar-legend li { display: inline-flex; align-items: center; gap: 8px; }
+  .bar-legend b { color: var(--ink); font-weight: 500; }
+  .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .majority-note {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--caution);
+    margin: 10px 0 0;
+  }
+  .compass-board {
+    position: relative;
+    width: min(100%, 440px);
+    aspect-ratio: 1;
+    margin: 8px auto 0;
+    border: 1px solid var(--line);
+    background:
+      linear-gradient(to right, transparent 49.6%, var(--line) 49.6%, var(--line) 50.4%, transparent 50.4%),
+      linear-gradient(to bottom, transparent 49.6%, var(--line) 49.6%, var(--line) 50.4%, transparent 50.4%),
+      var(--paper);
+    cursor: crosshair;
+  }
+  .compass-label {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+  }
+  .compass-label.left { left: 10px; top: 50%; transform: translateY(-50%); }
+  .compass-label.right { right: 10px; top: 50%; transform: translateY(-50%); }
+  .compass-label.top { top: 8px; left: 50%; transform: translateX(-50%); }
+  .compass-label.bottom { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .compass-dot, .compass-you {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    font-family: var(--mono);
+    font-size: 10px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 600;
+  }
+  .compass-dot[data-c="PH"] { left: 30%; top: 34%; background: #d7263d; }
+  .compass-dot[data-c="BN"] { left: 58%; top: 36%; background: #1f9bd6; }
+  .compass-dot[data-c="PN"] { left: 82%; top: 30%; background: #15387c; }
+  .compass-dot[data-c="GPS"] { left: 62%; top: 78%; background: #b8332e; }
+  .compass-dot[data-c="GRS"] { left: 48%; top: 84%; background: #e8772e; }
+  .compass-you {
+    background: var(--accent);
+    color: #102018;
+    border-color: var(--ink);
+    z-index: 2;
+  }
+  .compass-tools {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+    max-width: 440px;
+  }
+  .compass-tools label {
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .compass-legend { margin-top: 8px; }
+  .sim-presets, .sim-rows { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sim-presets button, .sim-step, .sim-row input[type="number"] {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+  }
+  .sim-presets button, .sim-step { padding: 0 12px; cursor: pointer; }
+  .sim-row {
+    display: grid;
+    grid-template-columns: 4.5rem 44px 4.5rem 44px auto;
+    align-items: center;
+    gap: 8px;
+    width: min(100%, 420px);
+  }
+  .sim-row input[type="number"] { width: 4.5rem; text-align: center; }
+  .sim-gov {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .sim-status {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--line);
+    background: var(--paper);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .sim-status[data-state="pass"] { border-left-color: var(--accent); }
+  .sim-status[data-state="hung"] { border-left-color: var(--caution); }
+  .sim-status[data-state="warn"] { border-left-color: var(--line-strong); }
+  .sim-chamber {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 16px;
+    max-width: 520px;
+  }
+  .sim-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: block;
+  }
+  .sim-meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: var(--ink-secondary);
+    margin: 10px 0 0;
   }
 """.strip()
 
@@ -473,7 +699,180 @@ def _body_en() -> str:
             "The Yang di-Pertuan Agong is head of state and the Prime "
             "Minister of Malaysia is the head of government.",
         ),
+        "ge13-bn-133": _claim(
+            "claim-ge13-bn-133",
+            GE13_WIKI,
+            "Barisan Nasional won 133 seats in the 2013 general election.",
+        ),
+        "ge13-pr-89": _claim(
+            "claim-ge13-pr-89",
+            GE13_WIKI,
+            "Pakatan Rakyat won 89 of the 222 seats.",
+        ),
+        "ge13-pr-vote": _claim(
+            "claim-ge13-pr-vote",
+            GE13_WIKI,
+            "The unofficial opposition Pakatan Rakyat coalition led by "
+            "Anwar Ibrahim received a majority of the vote, with its three "
+            "member parties collectively receiving 50.9% of the vote.",
+        ),
+        "ge13-bn-vote": _claim(
+            "claim-ge13-bn-vote",
+            GE13_WIKI,
+            "The incumbent governing alliance, Barisan Nasional, received "
+            "47.4% of the vote and won 133 seats.",
+        ),
+        "ge14-ph-113": _claim(
+            "claim-ge14-ph-113",
+            GE14_WIKI,
+            "Pakatan Harapan won 113 seats in the 2018 general election.",
+        ),
+        "ge14-bn-79": _claim(
+            "claim-ge14-bn-79",
+            GE14_WIKI,
+            "Barisan Nasional won 79 seats in the 2018 general election.",
+        ),
+        "ge14-gs-18": _claim(
+            "claim-ge14-gs-18",
+            GE14_WIKI,
+            "Gagasan Sejahtera won 18 seats in the 2018 general election.",
+        ),
+        "ge14-warisan-8": _claim(
+            "claim-ge14-warisan-8",
+            GE14_WIKI,
+            "Warisan won 8 seats in the 2018 general election.",
+        ),
+        "ge14-majority-112": _claim(
+            "claim-ge14-majority-112",
+            GE14_WIKI,
+            "The 2018 general election required 112 seats for a majority.",
+        ),
+        "gps-founded": _claim(
+            "claim-gps-founded",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak was founded on 12 June 2018.",
+        ),
+        "gps-from-bn": _claim(
+            "claim-gps-from-bn",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak was established in 2018 by four former "
+            "Barisan Nasional component parties operating solely in Sarawak "
+            "following the federal coalition's defeat in the 2018 Malaysian "
+            "general election.",
+        ),
+        "ge15-ph-82": _claim(
+            "claim-ge15-ph-82",
+            GE15_WIKI,
+            "Pakatan Harapan won 82 seats in the 2022 general election, a "
+            "figure that includes MUDA.",
+        ),
+        "ge15-pn-74": _claim(
+            "claim-ge15-pn-74",
+            GE15_WIKI,
+            "Perikatan Nasional won 74 seats in the 2022 general election.",
+        ),
+        "ge15-bn-30": _claim(
+            "claim-ge15-bn-30",
+            GE15_WIKI,
+            "Barisan Nasional won 30 seats in the 2022 general election.",
+        ),
+        "ge15-gps-23": _claim(
+            "claim-ge15-gps-23",
+            GE15_WIKI,
+            "Gabungan Parti Sarawak won 23 seats in the 2022 general election.",
+        ),
+        "ge15-grs-6": _claim(
+            "claim-ge15-grs-6",
+            GE15_WIKI,
+            "Gabungan Rakyat Sabah won 6 seats in the 2022 general election.",
+        ),
+        "ge15-warisan-3": _claim(
+            "claim-ge15-warisan-3",
+            GE15_WIKI,
+            "Warisan won 3 seats in the 2022 general election.",
+        ),
+        "ph-founded": _claim(
+            "claim-ph-founded",
+            PH_WIKI,
+            "Pakatan Harapan was founded on 22 September 2015.",
+        ),
+        "pn-founded": _claim(
+            "claim-pn-founded",
+            PN_WIKI,
+            "Perikatan Nasional was founded on 29 February 2020.",
+        ),
+        "grs-founded": _claim(
+            "claim-grs-founded",
+            GRS_WIKI,
+            "Gabungan Rakyat Sabah was established in September 2020, when "
+            "Hajiji Noor set up an informal alliance of that name.",
+        ),
+        "ph-position": _claim(
+            "claim-ph-position",
+            PH_WIKI,
+            "Pakatan Harapan's political position is centre to centre-left.",
+        ),
+        "pn-position": _claim(
+            "claim-pn-position",
+            PN_WIKI,
+            "Perikatan Nasional's political position is right-wing to far-right.",
+        ),
+        "bn-position": _claim(
+            "claim-bn-position",
+            BN_WIKI,
+            "Barisan Nasional's political position is centre-right to right-wing.",
+        ),
+        "gps-position": _claim(
+            "claim-gps-position",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak's political position is centre-right to "
+            "right-wing.",
+        ),
+        "gps-sarawak": _claim(
+            "claim-gps-sarawak",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak is a Sarawak-based political alliance in "
+            "Malaysia.",
+        ),
+        "grs-position": _claim(
+            "claim-grs-position",
+            GRS_WIKI,
+            "Gabungan Rakyat Sabah's political position is centre to "
+            "centre-right.",
+        ),
+        "grs-sabah": _claim(
+            "claim-grs-sabah",
+            GRS_WIKI,
+            "Gabungan Rakyat Sabah is a Malaysian coalition of Sabah-based "
+            "parties.",
+        ),
     }
+    ge13_bar = _stack_bar(
+        (
+            ("BN", 133, _CHART_COLORS["BN"]),
+            ("Pakatan Rakyat", 89, _CHART_COLORS["PR"]),
+        )
+    )
+    ge14_bar = _stack_bar(
+        (
+            ("PH", 113, _CHART_COLORS["PH"]),
+            ("BN", 79, _CHART_COLORS["BN"]),
+            ("Gagasan Sejahtera", 18, _CHART_COLORS["GS"]),
+            ("WARISAN", 8, _CHART_COLORS["WARISAN"]),
+            ("Others", 4, _CHART_COLORS["OTHER"]),
+        )
+    )
+    ge15_bar = _stack_bar(
+        (
+            ("PH", 82, _CHART_COLORS["PH"]),
+            ("PN", 74, _CHART_COLORS["PN"]),
+            ("BN", 30, _CHART_COLORS["BN"]),
+            ("GPS", 23, _CHART_COLORS["GPS"]),
+            ("GRS", 6, _CHART_COLORS["GRS"]),
+            ("WARISAN", 3, _CHART_COLORS["WARISAN"]),
+            ("Others", 4, _CHART_COLORS["OTHER"]),
+        )
+    )
     return f"""
 <div class="pk-scroll">
   <nav class="act-nav" aria-label="Acts">
@@ -481,7 +880,10 @@ def _body_en() -> str:
     <a href="#act-2">2 · Person</a>
     <a href="#act-3">3 · Seat</a>
     <a href="#act-4">4 · Government</a>
+    <a href="#act-4-years">Seats by year</a>
+    <a href="#act-4-compass">Compass</a>
     <a href="#act-5">5 · Work</a>
+    <a href="#vote-sim">House</a>
     <a href="#act-6">6 · Above this</a>
   </nav>
 
@@ -580,7 +982,7 @@ def _body_en() -> str:
     <p class="more">
       For who sits inside each Coalition, see
       <a href="/learn/coalitions.html">The five Coalitions</a>.
-      This walkthrough does not redraw those histories year by year.
+      The next scene draws Seat totals for three general elections.
     </p>
     <aside class="why">
       <div class="tag">Why a Government Coalition</div>
@@ -594,7 +996,129 @@ def _body_en() -> str:
     </aside>
   </section>
 
-  <section class="scene" id="act-5">
+  <section class="scene long-scene" id="act-4-years">
+    <div class="pk-eyebrow">04b · Seats by year</div>
+    <h2>The same house. Different Coalitions.</h2>
+    <p class="prose-claim">
+      {c["ph-founded"]}
+      {c["gps-founded"]}
+      {c["gps-from-bn"]}
+      {c["pn-founded"]}
+      {c["grs-founded"]}
+    </p>
+    <p class="caveat">
+      The five Coalitions this site tracks did not all exist in 2013. PH
+      was founded in 2015. GPS was formed after GE14, when Sarawak BN
+      parties left. PN and GRS came later. Each chart names the blocs that
+      contested that year. The yellow mark is 112 Seats — a Majority.
+    </p>
+    <div class="year-charts">
+      <article class="year-card">
+        <div class="tag">GE13 · 2013</div>
+        <h3>BN held a Majority</h3>
+        {ge13_bar}
+        <p class="majority-note">Majority line · 112 of 222</p>
+        <ul class="bar-legend">
+          {_legend_row("BN", 133, _CHART_COLORS["BN"])}
+          {_legend_row("Pakatan Rakyat", 89, _CHART_COLORS["PR"])}
+        </ul>
+        <p class="prose-claim">
+          {c["ge13-bn-133"]}
+          {c["ge13-pr-89"]}
+          {c["ge13-pr-vote"]}
+          {c["ge13-bn-vote"]}
+        </p>
+      </article>
+      <article class="year-card">
+        <div class="tag">GE14 · 2018</div>
+        <h3>PH crossed 112</h3>
+        {ge14_bar}
+        <p class="majority-note">Majority line · 112 of 222</p>
+        <ul class="bar-legend">
+          {_legend_row("PH", 113, _CHART_COLORS["PH"])}
+          {_legend_row("BN", 79, _CHART_COLORS["BN"])}
+          {_legend_row("Gagasan Sejahtera", 18, _CHART_COLORS["GS"])}
+          {_legend_row("WARISAN", 8, _CHART_COLORS["WARISAN"])}
+        </ul>
+        <p class="prose-claim">
+          {c["ge14-majority-112"]}
+          {c["ge14-ph-113"]}
+          {c["ge14-bn-79"]}
+          {c["ge14-gs-18"]}
+          {c["ge14-warisan-8"]}
+        </p>
+      </article>
+      <article class="year-card">
+        <div class="tag">GE15 · 2022</div>
+        <h3>No Coalition held a Majority</h3>
+        {ge15_bar}
+        <p class="majority-note">Majority line · 112 of 222</p>
+        <ul class="bar-legend">
+          {_legend_row("PH", 82, _CHART_COLORS["PH"])}
+          {_legend_row("PN", 74, _CHART_COLORS["PN"])}
+          {_legend_row("BN", 30, _CHART_COLORS["BN"])}
+          {_legend_row("GPS", 23, _CHART_COLORS["GPS"])}
+          {_legend_row("GRS", 6, _CHART_COLORS["GRS"])}
+          {_legend_row("WARISAN", 3, _CHART_COLORS["WARISAN"])}
+        </ul>
+        <p class="prose-claim">
+          {c["ge15-ph-82"]}
+          {c["ge15-pn-74"]}
+          {c["ge15-bn-30"]}
+          {c["ge15-gps-23"]}
+          {c["ge15-grs-6"]}
+          {c["ge15-warisan-3"]}
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="scene long-scene" id="act-4-compass">
+    <div class="pk-eyebrow">04c · A political compass</div>
+    <h2>Where Wikipedia places each Coalition</h2>
+    <p class="caveat">
+      This is a teaching sketch, not a scientific score. Wikipedia does
+      not publish x and y numbers. The dots follow the left–right labels
+      on each Coalition’s page, and they drop GPS and GRS toward East
+      Malaysia because those Coalitions are state-based. The exact pixel
+      is ours. A click is your mark only. This page will not name a
+      Coalition for you.
+    </p>
+    <div class="compass-panel">
+      <div class="compass-board" id="vote-compass" role="img" aria-label="Political compass teaching sketch">
+        <span class="compass-label top">Peninsula</span>
+        <span class="compass-label bottom">East Malaysia</span>
+        <span class="compass-label left">Left</span>
+        <span class="compass-label right">Right</span>
+        <span class="compass-dot" data-c="PH" title="PH">PH</span>
+        <span class="compass-dot" data-c="BN" title="BN">BN</span>
+        <span class="compass-dot" data-c="PN" title="PN">PN</span>
+        <span class="compass-dot" data-c="GPS" title="GPS">GPS</span>
+        <span class="compass-dot" data-c="GRS" title="GRS">GRS</span>
+        <span class="compass-you" id="vote-compass-you" hidden>You</span>
+      </div>
+      <div class="compass-tools">
+        <label>Left to right
+          <input id="vote-compass-x" type="range" min="2" max="98" value="50">
+        </label>
+        <label>Peninsula to East Malaysia
+          <input id="vote-compass-y" type="range" min="2" max="98" value="50">
+        </label>
+        <p class="more" id="vote-compass-note">Place a mark if you want one. The page does not score you.</p>
+      </div>
+      <div class="compass-legend prose-claim">
+        {c["ph-position"]}
+        {c["bn-position"]}
+        {c["pn-position"]}
+        {c["gps-position"]}
+        {c["gps-sarawak"]}
+        {c["grs-position"]}
+        {c["grs-sabah"]}
+      </div>
+    </div>
+  </section>
+
+  <section class="scene long-scene" id="act-5">
     <div class="pk-eyebrow">05 · What that government does here</div>
     <h2>Bills, then a counted vote.</h2>
     <p class="prose-claim">
@@ -606,6 +1130,69 @@ def _body_en() -> str:
       Watch the current Bills on <a href="/bills/">the Bill tracker</a>.
       Watch who speaks on <a href="/dewan/">Dewan</a>.
     </p>
+    <div class="vote-sim" id="vote-sim">
+      <div class="tag">A legislature simulator</div>
+      <h3>Try a house of 222 Seats</h3>
+      <p class="more">
+        This is not a live feed of today’s Dewan Rakyat. It is a teaching
+        tool on this page. Tick which Coalitions sit in the Government
+        Coalition. A Majority is 112 Seats. A Bill still needs 112 yes
+        votes on a Division.
+      </p>
+      <div class="sim-presets">
+        <button type="button" data-sim-preset="ge15">GE15 night</button>
+        <button type="button" data-sim-preset="ge14">GE14 night</button>
+        <button type="button" data-sim-preset="majority">Just over Majority</button>
+      </div>
+      <div class="sim-rows" style="display:grid;gap:10px;margin-top:16px">
+        <div class="sim-row">
+          <b>PH</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="PH" aria-label="Fewer PH Seats">−</button>
+          <input data-sim-seats="PH" type="number" min="0" max="222" value="82">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="PH" aria-label="More PH Seats">+</button>
+          <label class="sim-gov"><input data-sim-gov="PH" type="checkbox" checked> Government Coalition</label>
+        </div>
+        <div class="sim-row">
+          <b>PN</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="PN" aria-label="Fewer PN Seats">−</button>
+          <input data-sim-seats="PN" type="number" min="0" max="222" value="74">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="PN" aria-label="More PN Seats">+</button>
+          <label class="sim-gov"><input data-sim-gov="PN" type="checkbox"> Government Coalition</label>
+        </div>
+        <div class="sim-row">
+          <b>BN</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="BN" aria-label="Fewer BN Seats">−</button>
+          <input data-sim-seats="BN" type="number" min="0" max="222" value="30">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="BN" aria-label="More BN Seats">+</button>
+          <label class="sim-gov"><input data-sim-gov="BN" type="checkbox" checked> Government Coalition</label>
+        </div>
+        <div class="sim-row">
+          <b>GPS</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="GPS" aria-label="Fewer GPS Seats">−</button>
+          <input data-sim-seats="GPS" type="number" min="0" max="222" value="23">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="GPS" aria-label="More GPS Seats">+</button>
+          <label class="sim-gov"><input data-sim-gov="GPS" type="checkbox" checked> Government Coalition</label>
+        </div>
+        <div class="sim-row">
+          <b>GRS</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="GRS" aria-label="Fewer GRS Seats">−</button>
+          <input data-sim-seats="GRS" type="number" min="0" max="222" value="6">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="GRS" aria-label="More GRS Seats">+</button>
+          <label class="sim-gov"><input data-sim-gov="GRS" type="checkbox" checked> Government Coalition</label>
+        </div>
+        <div class="sim-row">
+          <b>Others</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="OTHER" aria-label="Fewer other Seats">−</button>
+          <input data-sim-seats="OTHER" type="number" min="0" max="222" value="7">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="OTHER" aria-label="More other Seats">+</button>
+          <label class="sim-gov"><input data-sim-gov="OTHER" type="checkbox"> Government Coalition</label>
+        </div>
+      </div>
+      <p class="sim-meta">Seats in this house: <span data-sim-total>222</span> / 222. Majority = 112.</p>
+      <p class="sim-status" data-sim-status data-state="pass">This house has a Majority if the ticked Coalitions hold 112 Seats.</p>
+      <div data-sim-stack>{ge15_bar}</div>
+      <div class="sim-chamber" data-sim-chamber aria-hidden="true"></div>
+    </div>
   </section>
 
   <section class="scene long-scene" id="act-6">
@@ -834,7 +1421,168 @@ def _body_ms() -> str:
             POLITICS_WIKI,
             "Yang di-Pertuan Agong ialah ketua negara dan Perdana Menteri Malaysia ialah ketua kerajaan.",
         ),
+        "ge13-bn-133": _claim(
+            "claim-ge13-bn-133",
+            GE13_WIKI,
+            "Barisan Nasional memenangi 133 kerusi dalam pilihan raya umum 2013.",
+        ),
+        "ge13-pr-89": _claim(
+            "claim-ge13-pr-89",
+            GE13_WIKI,
+            "Pakatan Rakyat memenangi 89 daripada 222 kerusi.",
+        ),
+        "ge13-pr-vote": _claim(
+            "claim-ge13-pr-vote",
+            GE13_WIKI,
+            "Gabungan pembangkang tidak rasmi Pakatan Rakyat pimpinan Anwar Ibrahim menerima majoriti undi, dengan tiga parti ahlinya secara kolektif menerima 50.9% undi.",
+        ),
+        "ge13-bn-vote": _claim(
+            "claim-ge13-bn-vote",
+            GE13_WIKI,
+            "Gabungan pemerintah sedia ada, Barisan Nasional, menerima 47.4% undi dan memenangi 133 kerusi.",
+        ),
+        "ge14-ph-113": _claim(
+            "claim-ge14-ph-113",
+            GE14_WIKI,
+            "Pakatan Harapan memenangi 113 kerusi dalam pilihan raya umum 2018.",
+        ),
+        "ge14-bn-79": _claim(
+            "claim-ge14-bn-79",
+            GE14_WIKI,
+            "Barisan Nasional memenangi 79 kerusi dalam pilihan raya umum 2018.",
+        ),
+        "ge14-gs-18": _claim(
+            "claim-ge14-gs-18",
+            GE14_WIKI,
+            "Gagasan Sejahtera memenangi 18 kerusi dalam pilihan raya umum 2018.",
+        ),
+        "ge14-warisan-8": _claim(
+            "claim-ge14-warisan-8",
+            GE14_WIKI,
+            "Warisan memenangi 8 kerusi dalam pilihan raya umum 2018.",
+        ),
+        "ge14-majority-112": _claim(
+            "claim-ge14-majority-112",
+            GE14_WIKI,
+            "Pilihan raya umum 2018 memerlukan 112 kerusi untuk majoriti.",
+        ),
+        "gps-founded": _claim(
+            "claim-gps-founded",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak ditubuhkan pada 12 Jun 2018.",
+        ),
+        "gps-from-bn": _claim(
+            "claim-gps-from-bn",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak ditubuhkan pada 2018 oleh empat bekas parti komponen Barisan Nasional yang beroperasi hanya di Sarawak selepas kekalahan gabungan persekutuan dalam pilihan raya umum Malaysia 2018.",
+        ),
+        "ge15-ph-82": _claim(
+            "claim-ge15-ph-82",
+            GE15_WIKI,
+            "Pakatan Harapan memenangi 82 kerusi dalam pilihan raya umum 2022, angka yang merangkumi MUDA.",
+        ),
+        "ge15-pn-74": _claim(
+            "claim-ge15-pn-74",
+            GE15_WIKI,
+            "Perikatan Nasional memenangi 74 kerusi dalam pilihan raya umum 2022.",
+        ),
+        "ge15-bn-30": _claim(
+            "claim-ge15-bn-30",
+            GE15_WIKI,
+            "Barisan Nasional memenangi 30 kerusi dalam pilihan raya umum 2022.",
+        ),
+        "ge15-gps-23": _claim(
+            "claim-ge15-gps-23",
+            GE15_WIKI,
+            "Gabungan Parti Sarawak memenangi 23 kerusi dalam pilihan raya umum 2022.",
+        ),
+        "ge15-grs-6": _claim(
+            "claim-ge15-grs-6",
+            GE15_WIKI,
+            "Gabungan Rakyat Sabah memenangi 6 kerusi dalam pilihan raya umum 2022.",
+        ),
+        "ge15-warisan-3": _claim(
+            "claim-ge15-warisan-3",
+            GE15_WIKI,
+            "Warisan memenangi 3 kerusi dalam pilihan raya umum 2022.",
+        ),
+        "ph-founded": _claim(
+            "claim-ph-founded",
+            PH_WIKI,
+            "Pakatan Harapan ditubuhkan pada 22 September 2015.",
+        ),
+        "pn-founded": _claim(
+            "claim-pn-founded",
+            PN_WIKI,
+            "Perikatan Nasional ditubuhkan pada 29 Februari 2020.",
+        ),
+        "grs-founded": _claim(
+            "claim-grs-founded",
+            GRS_WIKI,
+            "Gabungan Rakyat Sabah ditubuhkan pada September 2020, apabila Hajiji Noor menubuhkan pakatan tidak rasmi dengan nama itu.",
+        ),
+        "ph-position": _claim(
+            "claim-ph-position",
+            PH_WIKI,
+            "Kedudukan politik Pakatan Harapan ialah tengah hingga tengah kiri.",
+        ),
+        "pn-position": _claim(
+            "claim-pn-position",
+            PN_WIKI,
+            "Kedudukan politik Perikatan Nasional ialah sayap kanan hingga jauh kanan.",
+        ),
+        "bn-position": _claim(
+            "claim-bn-position",
+            BN_WIKI,
+            "Kedudukan politik Barisan Nasional ialah tengah kanan hingga sayap kanan.",
+        ),
+        "gps-position": _claim(
+            "claim-gps-position",
+            GPS_WIKI,
+            "Kedudukan politik Gabungan Parti Sarawak ialah tengah kanan hingga sayap kanan.",
+        ),
+        "gps-sarawak": _claim(
+            "claim-gps-sarawak",
+            GPS_WIKI,
+            "Gabungan Parti Sarawak ialah pakatan politik berasaskan Sarawak di Malaysia.",
+        ),
+        "grs-position": _claim(
+            "claim-grs-position",
+            GRS_WIKI,
+            "Kedudukan politik Gabungan Rakyat Sabah ialah tengah hingga tengah kanan.",
+        ),
+        "grs-sabah": _claim(
+            "claim-grs-sabah",
+            GRS_WIKI,
+            "Gabungan Rakyat Sabah ialah gabungan Malaysia yang terdiri daripada parti berasaskan Sabah.",
+        ),
     }
+    ge13_bar = _stack_bar(
+        (
+            ("BN", 133, _CHART_COLORS["BN"]),
+            ("Pakatan Rakyat", 89, _CHART_COLORS["PR"]),
+        )
+    )
+    ge14_bar = _stack_bar(
+        (
+            ("PH", 113, _CHART_COLORS["PH"]),
+            ("BN", 79, _CHART_COLORS["BN"]),
+            ("Gagasan Sejahtera", 18, _CHART_COLORS["GS"]),
+            ("WARISAN", 8, _CHART_COLORS["WARISAN"]),
+            ("Lain-lain", 4, _CHART_COLORS["OTHER"]),
+        )
+    )
+    ge15_bar = _stack_bar(
+        (
+            ("PH", 82, _CHART_COLORS["PH"]),
+            ("PN", 74, _CHART_COLORS["PN"]),
+            ("BN", 30, _CHART_COLORS["BN"]),
+            ("GPS", 23, _CHART_COLORS["GPS"]),
+            ("GRS", 6, _CHART_COLORS["GRS"]),
+            ("WARISAN", 3, _CHART_COLORS["WARISAN"]),
+            ("Lain-lain", 4, _CHART_COLORS["OTHER"]),
+        )
+    )
     return f"""
 <div class="pk-scroll">
   <nav class="act-nav" aria-label="Bab">
@@ -842,7 +1590,10 @@ def _body_ms() -> str:
     <a href="#act-2">2 · Orang</a>
     <a href="#act-3">3 · Kerusi</a>
     <a href="#act-4">4 · Kerajaan</a>
+    <a href="#act-4-years">Kerusi mengikut tahun</a>
+    <a href="#act-4-compass">Kompas</a>
     <a href="#act-5">5 · Kerja</a>
+    <a href="#vote-sim">Dewan</a>
     <a href="#act-6">6 · Di atas ini</a>
   </nav>
 
@@ -941,7 +1692,7 @@ def _body_ms() -> str:
     <p class="more">
       Untuk siapa yang duduk dalam setiap Gabungan, lihat
       <a href="/ms/learn/coalitions.html">Lima Gabungan</a>.
-      Panduan ini tidak melukis semula sejarah itu tahun demi tahun.
+      Bab seterusnya melukis jumlah Kerusi untuk tiga pilihan raya umum.
     </p>
     <aside class="why">
       <div class="tag">Mengapa Gabungan Kerajaan</div>
@@ -955,7 +1706,130 @@ def _body_ms() -> str:
     </aside>
   </section>
 
-  <section class="scene" id="act-5">
+  <section class="scene long-scene" id="act-4-years">
+    <div class="pk-eyebrow">04b · Kerusi mengikut tahun</div>
+    <h2>Dewan yang sama. Gabungan yang berbeza.</h2>
+    <p class="prose-claim">
+      {c["ph-founded"]}
+      {c["gps-founded"]}
+      {c["gps-from-bn"]}
+      {c["pn-founded"]}
+      {c["grs-founded"]}
+    </p>
+    <p class="caveat">
+      Lima Gabungan yang dijejaki laman ini tidak semuanya wujud pada 2013.
+      PH ditubuhkan pada 2015. GPS dibentuk selepas PRU14, apabila parti
+      BN Sarawak keluar. PN dan GRS datang kemudian. Setiap carta menamakan
+      blok yang bertanding tahun itu. Tanda kuning ialah 112 Kerusi —
+      suatu Majoriti.
+    </p>
+    <div class="year-charts">
+      <article class="year-card">
+        <div class="tag">PRU13 · 2013</div>
+        <h3>BN memegang Majoriti</h3>
+        {ge13_bar}
+        <p class="majority-note">Garisan Majoriti · 112 daripada 222</p>
+        <ul class="bar-legend">
+          {_legend_row("BN", 133, _CHART_COLORS["BN"])}
+          {_legend_row("Pakatan Rakyat", 89, _CHART_COLORS["PR"])}
+        </ul>
+        <p class="prose-claim">
+          {c["ge13-bn-133"]}
+          {c["ge13-pr-89"]}
+          {c["ge13-pr-vote"]}
+          {c["ge13-bn-vote"]}
+        </p>
+      </article>
+      <article class="year-card">
+        <div class="tag">PRU14 · 2018</div>
+        <h3>PH melepasi 112</h3>
+        {ge14_bar}
+        <p class="majority-note">Garisan Majoriti · 112 daripada 222</p>
+        <ul class="bar-legend">
+          {_legend_row("PH", 113, _CHART_COLORS["PH"])}
+          {_legend_row("BN", 79, _CHART_COLORS["BN"])}
+          {_legend_row("Gagasan Sejahtera", 18, _CHART_COLORS["GS"])}
+          {_legend_row("WARISAN", 8, _CHART_COLORS["WARISAN"])}
+        </ul>
+        <p class="prose-claim">
+          {c["ge14-majority-112"]}
+          {c["ge14-ph-113"]}
+          {c["ge14-bn-79"]}
+          {c["ge14-gs-18"]}
+          {c["ge14-warisan-8"]}
+        </p>
+      </article>
+      <article class="year-card">
+        <div class="tag">PRU15 · 2022</div>
+        <h3>Tiada Gabungan memegang Majoriti</h3>
+        {ge15_bar}
+        <p class="majority-note">Garisan Majoriti · 112 daripada 222</p>
+        <ul class="bar-legend">
+          {_legend_row("PH", 82, _CHART_COLORS["PH"])}
+          {_legend_row("PN", 74, _CHART_COLORS["PN"])}
+          {_legend_row("BN", 30, _CHART_COLORS["BN"])}
+          {_legend_row("GPS", 23, _CHART_COLORS["GPS"])}
+          {_legend_row("GRS", 6, _CHART_COLORS["GRS"])}
+          {_legend_row("WARISAN", 3, _CHART_COLORS["WARISAN"])}
+        </ul>
+        <p class="prose-claim">
+          {c["ge15-ph-82"]}
+          {c["ge15-pn-74"]}
+          {c["ge15-bn-30"]}
+          {c["ge15-gps-23"]}
+          {c["ge15-grs-6"]}
+          {c["ge15-warisan-3"]}
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="scene long-scene" id="act-4-compass">
+    <div class="pk-eyebrow">04c · Kompas politik</div>
+    <h2>Di mana Wikipedia meletakkan setiap Gabungan</h2>
+    <p class="caveat">
+      Ini lakaran pengajaran, bukan skor saintifik. Wikipedia tidak
+      menerbitkan nombor x dan y. Titik mengikut label kiri–kanan pada
+      laman setiap Gabungan, dan GPS serta GRS diturunkan ke Malaysia
+      Timur kerana Gabungan itu berasaskan negeri. Piksel tepat ialah
+      milik kami. Klik ialah tanda anda sahaja. Laman ini tidak akan
+      menamakan Gabungan untuk anda.
+    </p>
+    <div class="compass-panel">
+      <div class="compass-board" id="vote-compass" role="img" aria-label="Lakaran pengajaran kompas politik">
+        <span class="compass-label top">Semenanjung</span>
+        <span class="compass-label bottom">Malaysia Timur</span>
+        <span class="compass-label left">Kiri</span>
+        <span class="compass-label right">Kanan</span>
+        <span class="compass-dot" data-c="PH" title="PH">PH</span>
+        <span class="compass-dot" data-c="BN" title="BN">BN</span>
+        <span class="compass-dot" data-c="PN" title="PN">PN</span>
+        <span class="compass-dot" data-c="GPS" title="GPS">GPS</span>
+        <span class="compass-dot" data-c="GRS" title="GRS">GRS</span>
+        <span class="compass-you" id="vote-compass-you" hidden>Anda</span>
+      </div>
+      <div class="compass-tools">
+        <label>Kiri ke kanan
+          <input id="vote-compass-x" type="range" min="2" max="98" value="50">
+        </label>
+        <label>Semenanjung ke Malaysia Timur
+          <input id="vote-compass-y" type="range" min="2" max="98" value="50">
+        </label>
+        <p class="more" id="vote-compass-note">Letakkan tanda jika anda mahu. Laman ini tidak menskor anda.</p>
+      </div>
+      <div class="compass-legend prose-claim">
+        {c["ph-position"]}
+        {c["bn-position"]}
+        {c["pn-position"]}
+        {c["gps-position"]}
+        {c["gps-sarawak"]}
+        {c["grs-position"]}
+        {c["grs-sabah"]}
+      </div>
+    </div>
+  </section>
+
+  <section class="scene long-scene" id="act-5">
     <div class="pk-eyebrow">05 · Apa yang kerajaan itu buat di sini</div>
     <h2>Rang undang-undang, kemudian undian yang dikira.</h2>
     <p class="prose-claim">
@@ -967,6 +1841,69 @@ def _body_ms() -> str:
       Lihat Rang Undang-Undang semasa di <a href="/bills/">penjejak RUU</a>.
       Lihat siapa bersuara di <a href="/dewan/">Dewan</a>.
     </p>
+    <div class="vote-sim" id="vote-sim">
+      <div class="tag">Simulator badan perundangan</div>
+      <h3>Cuba sebuah dewan 222 Kerusi</h3>
+      <p class="more">
+        Ini bukan suapan langsung Dewan Rakyat hari ini. Ia ialah alat
+        pengajaran di laman ini. Tanda Gabungan mana yang duduk dalam
+        Gabungan Kerajaan. Majoriti ialah 112 Kerusi. Rang Undang-Undang
+        masih memerlukan 112 undi ya dalam suatu Bahagian.
+      </p>
+      <div class="sim-presets">
+        <button type="button" data-sim-preset="ge15">Malam PRU15</button>
+        <button type="button" data-sim-preset="ge14">Malam PRU14</button>
+        <button type="button" data-sim-preset="majority">Sedikit di atas Majoriti</button>
+      </div>
+      <div class="sim-rows" style="display:grid;gap:10px;margin-top:16px">
+        <div class="sim-row">
+          <b>PH</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="PH" aria-label="Kurang Kerusi PH">−</button>
+          <input data-sim-seats="PH" type="number" min="0" max="222" value="82">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="PH" aria-label="Lebih Kerusi PH">+</button>
+          <label class="sim-gov"><input data-sim-gov="PH" type="checkbox" checked> Gabungan Kerajaan</label>
+        </div>
+        <div class="sim-row">
+          <b>PN</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="PN" aria-label="Kurang Kerusi PN">−</button>
+          <input data-sim-seats="PN" type="number" min="0" max="222" value="74">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="PN" aria-label="Lebih Kerusi PN">+</button>
+          <label class="sim-gov"><input data-sim-gov="PN" type="checkbox"> Gabungan Kerajaan</label>
+        </div>
+        <div class="sim-row">
+          <b>BN</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="BN" aria-label="Kurang Kerusi BN">−</button>
+          <input data-sim-seats="BN" type="number" min="0" max="222" value="30">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="BN" aria-label="Lebih Kerusi BN">+</button>
+          <label class="sim-gov"><input data-sim-gov="BN" type="checkbox" checked> Gabungan Kerajaan</label>
+        </div>
+        <div class="sim-row">
+          <b>GPS</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="GPS" aria-label="Kurang Kerusi GPS">−</button>
+          <input data-sim-seats="GPS" type="number" min="0" max="222" value="23">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="GPS" aria-label="Lebih Kerusi GPS">+</button>
+          <label class="sim-gov"><input data-sim-gov="GPS" type="checkbox" checked> Gabungan Kerajaan</label>
+        </div>
+        <div class="sim-row">
+          <b>GRS</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="GRS" aria-label="Kurang Kerusi GRS">−</button>
+          <input data-sim-seats="GRS" type="number" min="0" max="222" value="6">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="GRS" aria-label="Lebih Kerusi GRS">+</button>
+          <label class="sim-gov"><input data-sim-gov="GRS" type="checkbox" checked> Gabungan Kerajaan</label>
+        </div>
+        <div class="sim-row">
+          <b>Lain-lain</b>
+          <button type="button" class="sim-step" data-sim-step="-1" data-sim-step-code="OTHER" aria-label="Kurang Kerusi lain">−</button>
+          <input data-sim-seats="OTHER" type="number" min="0" max="222" value="7">
+          <button type="button" class="sim-step" data-sim-step="1" data-sim-step-code="OTHER" aria-label="Lebih Kerusi lain">+</button>
+          <label class="sim-gov"><input data-sim-gov="OTHER" type="checkbox"> Gabungan Kerajaan</label>
+        </div>
+      </div>
+      <p class="sim-meta">Kerusi dalam dewan ini: <span data-sim-total>222</span> / 222. Majoriti = 112.</p>
+      <p class="sim-status" data-sim-status data-state="pass">Dewan ini mempunyai Majoriti jika Gabungan yang ditanda memegang 112 Kerusi.</p>
+      <div data-sim-stack>{ge15_bar}</div>
+      <div class="sim-chamber" data-sim-chamber aria-hidden="true"></div>
+    </div>
   </section>
 
   <section class="scene long-scene" id="act-6">
@@ -1022,8 +1959,8 @@ def build_vote_path_page(language: Language, updated_at: date, status: ElectionS
         ),
         description=t(
             language,
-            "A first-time-voter walkthrough: street to Seat to DUN, first-past-the-post, Majority, and who else sits in Parliament.",
-            "Panduan pengundi kali pertama: jalan ke Kerusi ke DUN, first-past-the-post, Majoriti, dan siapa lagi yang duduk di Parlimen.",
+            "A first-time-voter walkthrough: street to Seat to DUN, first-past-the-post, Majority, Seat charts, a sourced compass, and a legislature simulator.",
+            "Panduan pengundi kali pertama: jalan ke Kerusi ke DUN, first-past-the-post, Majoriti, carta Kerusi, kompas bersumber, dan simulator badan perundangan.",
         ),
         active_nav="vote-path",
         language=language,
@@ -1031,7 +1968,11 @@ def build_vote_path_page(language: Language, updated_at: date, status: ElectionS
         updated_at=updated_at,
         sources_count=0,
         status=status,
-        body_html=f"<style>{_SCROLL_CSS}</style>\n{t(language, _body_en(), _body_ms())}",
+        body_html=(
+            f"<style>{_SCROLL_CSS}</style>\n"
+            f"{t(language, _body_en(), _body_ms())}\n"
+            '<script src="/learn/vote-path.js" defer></script>'
+        ),
         chrome=False,
         header_html=_header(language),
     )
