@@ -49,7 +49,7 @@ def test_vote_path_has_attributed_why_and_long_act_six() -> None:
     assert 'src="/learn/vote-path.js"' in en
     assert "113" in en
     assert "Pakatan Rakyat" in en
-    assert "does not name a Coalition for you" in en
+    assert "will not name a Coalition for you" in " ".join(en.split())
 
 
 def test_en_and_ms_are_different_copy() -> None:
