@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1: The Swing Model and Its Philosophy</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <script src="../assets/quiz.js" defer></script>
+</head>
+<body>
+    <a href="../MISSION.md">← Back to Mission</a>
+    <h1>Lesson 1: The Swing Model</h1>
+
+    <p>Welcome to your first lesson on how the `live-political-analysis` repository models the Malaysian GE16 election.</p>
+    
+    <h2>1. The Problem</h2>
+    <p>Predicting an election accurately per constituency is extremely hard. It usually requires granular demographic polling, historic precinct-level data, and expensive recurring operations. If we were to build a true predictive model, we would violate a core architectural rule: <strong>zero recurring cost</strong> (<a href="../RESOURCES.md">ADR 0002/0007</a>).</p>
+    
+    <h2>2. The Solution: The Swing Model</h2>
+    <p>Instead of a complex prediction engine, we use a <strong><a href="../reference/election-model-glossary.html#swing-model">Swing Model</a></strong>. Here is how it works:</p>
+
+    <ul>
+        <li><strong>The Baseline:</strong> We start with the hard facts: the GE15 federal election results for all 222 Seats.</li>
+        <li><strong>The Input:</strong> We gather <span class="concept">Sentiment</span> purely from local, self-hosted analysis of news articles and periodic free poll reports (Merdeka Center).</li>
+        <li><strong>The Application:</strong> We apply this Sentiment as a <strong>uniform swing across an entire state</strong>.</li>
+    </ul>
+
+    <div class="alert">
+        <strong>The Key Takeaway:</strong> If Sentiment suggests a 5% swing towards a Coalition in Johor, we simply add 5% to that Coalition's GE15 Baseline margin for <em>every single seat in Johor</em>.
+    </div>
+
+    <h2>3. Why use this specific model?</h2>
+    <p>As documented in <a href="../RESOURCES.md">ADR 0001</a> and <a href="../RESOURCES.md">ADR 0005</a>, this approach has massive architectural benefits:</p>
+    <ol>
+        <li><strong>Transparency (It's just arithmetic):</strong> A <span class="concept">Seat Call</span> is never a bespoke, subjective judgement about a specific constituency. It is pure math: <code>Baseline + State Swing</code>.</li>
+        <li><strong>Falsifiability:</strong> Because we use uncalibrated, provisional constants to turn sentiment into a percentage swing (<a href="../RESOURCES.md">ADR 0003</a>), we must present our results as a <em>Projection</em>, not a Prediction. It is honest about its limitations.</li>
+        <li><strong>Cost:</strong> It runs completely free, avoiding expensive APIs or complex demographic data purchases.</li>
+    </ol>
+
+    <div class="quiz-widget">
+        <div class="quiz-question">Knowledge Check: How does the model calculate a Seat Call for the constituency of Muar?</div>
+        <div class="quiz-options">
+            <div class="quiz-option" data-correct="false" data-explanation="Incorrect. The model carries no seat-specific demographic signal.">
+                A) By analyzing Muar's specific demographic changes since GE15.
+            </div>
+            <div class="quiz-option" data-correct="true" data-explanation="Correct! The model applies a uniform state swing (Johor) directly to Muar's historical GE15 baseline.">
+                B) By taking Muar's GE15 Baseline and adding the uniform Johor State Swing.
+            </div>
+            <div class="quiz-option" data-correct="false" data-explanation="Incorrect. The Swing Model calculates swings per state, not a single national swing (which produced confident nonsense in earlier iterations).">
+                C) By applying a uniform national swing to all 222 seats.
+            </div>
+        </div>
+        <div class="quiz-feedback"></div>
+    </div>
+
+    <p><em>Have questions about this lesson? Ask your agent in the chat!</em></p>
+</body>
+</html>

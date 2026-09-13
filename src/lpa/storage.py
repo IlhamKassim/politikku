@@ -316,8 +316,15 @@ def save_scored_articles(
         connection.execute(
             delete(scored_article).where(scored_article.c.computed_at == computed_at)
         )
-        rows = [
-            {
+        # Keyed by url, because (computed_at, url) is this table's primary
+        # key and nothing upstream promises the day's coverage holds each
+        # link once: two outlets can syndicate one story, and a feed can
+        # list the same link twice. Inserting both raises IntegrityError,
+        # which rolls back the whole snapshot and stops the site updating
+        # for the day. The first scoring of a url wins; a second copy of
+        # the same article says nothing new.
+        by_url = {
+            article.url: {
                 "computed_at": computed_at,
                 "url": article.url,
                 "title": article.title,
@@ -325,8 +332,9 @@ def save_scored_articles(
                 "text": article.text,
                 "coalition_scores": dict(scores) if scores else {},
             }
-            for article, scores in scored
-        ]
+            for article, scores in reversed(list(scored))
+        }
+        rows = list(by_url.values())
         if rows:
             connection.execute(scored_article.insert(), rows)
         connection.execute(delete(scored_article).where(scored_article.c.computed_at < cutoff))

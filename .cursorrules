@@ -1,0 +1,15 @@
+# live-political-analysis — Cursor Rules
+
+See `CONTEXT.md` for the canonical domain glossary (*Coalition*, *Seat*, *Majority*, *Government Coalition*, *Non-government*, *Baseline*, *Sentiment*, *Swing*, *Projection*, *Seat Call*).
+
+## Guardrails
+1. **Never push or open PRs**: Do not execute destructive git commands. Local commits only when requested.
+2. **Zero recurring cost**: No paid external APIs or hosted compute dependencies (ADR 0002/0007).
+3. **Verify with tests**: Run `.venv/bin/pytest` and linter checks (`.venv/bin/ruff check`, `.venv/bin/mypy src`).
+
+## Plain & Easy Language
+All answers, explanations, and responses must use plain, easy-to-understand language:
+- **Simple Phrasing**: Explain technical concepts, reasoning, and code changes in clear everyday words without dense academic jargon.
+- **Short Sentences**: Keep sentences short and clear. One idea per sentence where possible.
+- **Clear Domain Explanations**: While adhering strictly to the exact canonical domain terms from `CONTEXT.md` (*Seat*, *Majority*, *Government Coalition*, *Projection*, *Seat Call*), explain what they mean in everyday language whenever helpful.
+- **Concrete & Direct**: Say plainly what was done, what changed, or what needs to be done next without unnecessary fluff.

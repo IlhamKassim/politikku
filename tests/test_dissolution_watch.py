@@ -98,6 +98,20 @@ def test_speculation_is_not_reported(text: str) -> None:
     assert scan([_article(text)], NOT_CALLED) == ()
 
 
+def test_a_real_report_survives_the_word_surge() -> None:
+    """The hedge "urge" was matched as a substring, so it also matched "surge",
+    "surged" and "resurgence" — the vocabulary coverage of a called election
+    reaches for. The watch threw away the report it exists to catch."""
+    text = "Parliament was dissolved this morning as PN support surged."
+    (signal,) = scan([_article(text)], NOT_CALLED)
+    assert signal.kind is SignalKind.DISSOLUTION
+
+
+def test_a_call_to_dissolve_parliament_is_still_a_hedge() -> None:
+    """Matching "urge" as a whole word must not let the speculation back in."""
+    assert scan([_article("Activists urged Parliament to be dissolved.")], NOT_CALLED) == ()
+
+
 def test_a_real_report_survives_a_quoted_prediction() -> None:
     """A report of a real dissolution usually also quotes someone who called
     it. Hedges are checked per sentence, so the report is still reported."""

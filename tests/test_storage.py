@@ -10,7 +10,7 @@ from fixtures import PH, PN, government_config, two_coalition_seats
 from pytest import raises
 
 from lpa.aggregate import AggregatedSentiment
-from lpa.domain import ElectionStatus
+from lpa.domain import Article, ElectionStatus
 from lpa.poll_calibration import LeaderRating, PollCalibration
 from lpa.storage import (
     connect,
@@ -18,11 +18,13 @@ from lpa.storage import (
     load_poll_calibrations,
     load_previous_trigger_watch,
     load_projections,
+    load_scored_articles,
     load_seat_baselines,
     load_state_swing,
     load_trigger_posts,
     normalise_database_url,
     save_poll_calibrations,
+    save_scored_articles,
     save_seat_baselines,
     save_snapshot,
     save_trigger_posts,
@@ -507,3 +509,33 @@ def test_more_than_one_post_the_same_day_both_persist():
         "GE16 has been called.",
         "Johor reported.",
     ]
+
+
+def _article(url: str, *, title: str = "Headline") -> Article:
+    return Article(
+        source="Bernama",
+        url=url,
+        published_at=None,
+        title=title,
+        text="body",
+    )
+
+
+def test_the_same_link_twice_in_a_day_does_not_break_the_snapshot():
+    """(computed_at, url) is the table's primary key and nothing upstream
+    promises the day's coverage holds each link once — two outlets syndicate
+    one story, and a feed can list a link twice. Inserting both raised
+    IntegrityError, which rolled back the whole snapshot and left the site on
+    yesterday's figures."""
+    engine = connect("sqlite+pysqlite:///:memory:")
+    url = "https://example.test/one-story"
+
+    save_scored_articles(
+        engine,
+        date(2026, 9, 13),
+        [(_article(url, title="First"), None), (_article(url, title="Second"), None)],
+    )
+
+    (row,) = load_scored_articles(engine, computed_at=date(2026, 9, 13))
+    assert row["url"] == url
+    assert row["title"] == "First"

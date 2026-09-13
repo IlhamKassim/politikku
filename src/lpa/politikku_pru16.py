@@ -72,7 +72,7 @@ class Pru16Model:
     """The Seats each Coalition actually won, once they are known.
 
     Empty until the Election Commission has declared enough Seats to be worth
-    showing. `government` here means the bloc that formed the government after
+    showing. `government` here means the Coalition that formed the government after
     the election, which is not always the one that held it before.
     """
     results_source: str = ""
@@ -179,7 +179,7 @@ def time_left(target: date, now: datetime) -> tuple[int, int, int, int]:
     return remaining // 86400, remaining % 86400 // 3600, remaining % 3600 // 60, remaining % 60
 
 
-def _count_block(target: date, now: datetime, caption: str, language: Language) -> str:
+def _countdown_widget(target: date, now: datetime, caption: str, language: Language) -> str:
     """The big day count, the running hours/minutes/seconds under it, and what
     the browser needs to keep them moving."""
     days, hours, minutes, seconds = time_left(target, now)
@@ -227,7 +227,7 @@ def _hero(model: Pru16Model, language: Language) -> str:
         note = (
             t(
                 language,
-                f"{names} won {seats} of {model.total_seats} Seats, "
+                f"{names} took {seats} of {model.total_seats} Seats, "
                 f"{gap} more than the {model.majority_threshold} needed for a Majority.",
                 f"{names} memenangi {seats} daripada {model.total_seats} kerusi, "
                 f"{gap} lebih daripada {model.majority_threshold} untuk Majoriti.",
@@ -235,12 +235,12 @@ def _hero(model: Pru16Model, language: Language) -> str:
             if gap >= 0
             else t(
                 language,
-                f"{names} won {seats} of {model.total_seats} Seats, "
+                f"{names} took {seats} of {model.total_seats} Seats, "
                 f"{-gap} short of the {model.majority_threshold} needed for a Majority. "
-                "No single bloc holds a Majority.",
+                "No single Coalition holds a Majority.",
                 f"{names} memenangi {seats} daripada {model.total_seats} kerusi, "
                 f"kurang {-gap} daripada {model.majority_threshold} untuk Majoriti. "
-                "Tiada blok tunggal memegang Majoriti.",
+                "Tiada Gabungan tunggal memegang Majoriti.",
             )
         )
     elif not status.called:
@@ -248,7 +248,7 @@ def _hero(model: Pru16Model, language: Language) -> str:
         chip = t(language, "Not called", "Belum diisytiharkan")
         heading = t(language, "GE16 has not been called.", "PRU16 belum diisytiharkan.")
         deadline = html.escape(_long_date(status.constitutional_deadline, language))
-        count = _count_block(
+        count = _countdown_widget(
             status.constitutional_deadline,
             model.now,
             t(
@@ -297,7 +297,7 @@ def _hero(model: Pru16Model, language: Language) -> str:
             heading = t(
                 language, "GE16 polling has taken place.", "Pengundian PRU16 telah berlangsung."
             )
-        count = _count_block(
+        count = _countdown_widget(
             status.polling_date,
             model.now,
             t(
@@ -712,24 +712,24 @@ def _majority_lede(gov: int, threshold: int, language: Language) -> str:
     if gap > 0:
         return t(
             language,
-            f"The Government Coalition is projected to win <b>{gov} Seats</b>, "
+            f"The Government Coalition is projected at <b>{gov} Seats</b>, "
             f"{gap} more than the {threshold} needed for a Majority.",
-            f"Gabungan Kerajaan diunjurkan memenangi <b>{gov} kerusi</b>, "
+            f"Gabungan Kerajaan diunjurkan pada <b>{gov} kerusi</b>, "
             f"{gap} lebih daripada {threshold} yang diperlukan untuk Majoriti.",
         )
     if gap == 0:
         return t(
             language,
-            f"The Government Coalition is projected to win <b>{gov} Seats</b>, "
+            f"The Government Coalition is projected at <b>{gov} Seats</b>, "
             f"exactly the {threshold} needed for a Majority.",
-            f"Gabungan Kerajaan diunjurkan memenangi <b>{gov} kerusi</b>, "
+            f"Gabungan Kerajaan diunjurkan pada <b>{gov} kerusi</b>, "
             f"tepat {threshold} yang diperlukan untuk Majoriti.",
         )
     return t(
         language,
-        f"The Government Coalition is projected to win <b>{gov} Seats</b>, "
+        f"The Government Coalition is projected at <b>{gov} Seats</b>, "
         f"{-gap} short of the {threshold} needed for a Majority.",
-        f"Gabungan Kerajaan diunjurkan memenangi <b>{gov} kerusi</b>, "
+        f"Gabungan Kerajaan diunjurkan pada <b>{gov} kerusi</b>, "
         f"kurang {-gap} daripada {threshold} yang diperlukan untuk Majoriti.",
     )
 
@@ -840,7 +840,7 @@ def _delta_chip(delta: int, language: Language) -> str:
 
 
 def _comparison(model: Pru16Model, language: Language) -> str:
-    """Predicted against actual, once the Seats are in.
+    """The Projection against the actual Seats, once they are in.
 
     This is the page's last act. Every other section counts towards an
     election; this one is the only place that says, afterwards, how well the
@@ -939,7 +939,7 @@ def _comparison(model: Pru16Model, language: Language) -> str:
     )
 
     # The average miss across Coalitions, which is the honest headline number:
-    # a Projection that is close on the big blocs and wild on the small ones
+    # a Projection that is close on the big Coalitions and wild on the small ones
     # is not an accurate Projection.
     misses = [abs(r.seats - projected.get(r.code, 0)) for r in model.results]
     mean_miss = sum(misses) / len(misses)
@@ -1557,7 +1557,7 @@ def _demo_result() -> tuple[tuple[CoalitionRow, ...], ElectionStatus]:
     Nothing here is a forecast and none of it may ever reach the published
     page: the numbers exist only so the comparison section has something to
     draw before a real election gives it real ones. They are deliberately
-    untidy — one bloc missed badly, one called exactly — because a mock where
+    untidy — one Coalition missed badly, one called exactly — because a mock where
     every number is close would flatter a layout whose whole job is to show
     the misses.
     """
