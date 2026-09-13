@@ -101,7 +101,6 @@ public/learn/*.html
 public/ms/learn/*.html
 public/learn/how-a-vote-works/
 public/ms/learn/how-a-vote-works/
-public/learn/prototypes/
 
 # public/projection/<year>/<month>/<day>.html (#55) is also tracked,
 # deliberately — the path moved with the content in #102/#104, but not the

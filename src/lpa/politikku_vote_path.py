@@ -25,15 +25,11 @@ from lpa.politikku_shell import Language, landing_url, render_shell, route, t
 
 PAGE_PATH = "learn/how-a-vote-works/"
 
-CONTEXT_MD = (
-    "https://raw.githubusercontent.com/IlhamKassim/live-political-analysis/main/CONTEXT.md"
-)
+CONTEXT_MD = "https://raw.githubusercontent.com/IlhamKassim/live-political-analysis/main/CONTEXT.md"
 PARLIAMENT_WIKI = "https://en.wikipedia.org/wiki/Parliament_of_Malaysia?action=raw"
 POLITICS_WIKI = "https://en.wikipedia.org/wiki/Politics_of_Malaysia?action=raw"
 DUN_WIKI = "https://en.wikipedia.org/wiki/Dewan_Undangan_Negeri?action=raw"
-STATES_WIKI = (
-    "https://en.wikipedia.org/wiki/States_and_federal_territories_of_Malaysia?action=raw"
-)
+STATES_WIKI = "https://en.wikipedia.org/wiki/States_and_federal_territories_of_Malaysia?action=raw"
 ELECTIONS_WIKI = "https://en.wikipedia.org/wiki/Elections_in_Malaysia?action=raw"
 GE15_WIKI = "https://en.wikipedia.org/wiki/2022_Malaysian_general_election?action=raw"
 
@@ -276,8 +272,7 @@ def _body_en() -> str:
         "thirteen": _claim(
             "claim-thirteen-states",
             STATES_WIKI,
-            "Malaysia is a federation of thirteen states and three federal "
-            "territories.",
+            "Malaysia is a federation of thirteen states and three federal territories.",
         ),
         "each-state-dun": _claim(
             "claim-each-state-dun",
@@ -307,8 +302,7 @@ def _body_en() -> str:
         "ft-direct": _claim(
             "claim-ft-direct",
             STATES_WIKI,
-            "The federal territories are directly governed by the federal "
-            "government.",
+            "The federal territories are directly governed by the federal government.",
         ),
         "ft-no-subnational": _claim(
             "claim-ft-no-subnational",
@@ -318,8 +312,7 @@ def _body_en() -> str:
         "state-power": _claim(
             "claim-state-legislature",
             POLITICS_WIKI,
-            "Legislative power is vested in the federal parliament and the 13 "
-            "state assemblies.",
+            "Legislative power is vested in the federal parliament and the 13 state assemblies.",
         ),
         "fptp": _claim(
             "claim-fptp",
@@ -355,8 +348,7 @@ def _body_en() -> str:
         "non-gov": _claim(
             "claim-non-government",
             CONTEXT_MD,
-            "Non-government means every Seat or Coalition outside the "
-            "Government Coalition.",
+            "Non-government means every Seat or Coalition outside the Government Coalition.",
         ),
         "hung": _claim(
             "claim-hung-ge15",
@@ -399,8 +391,7 @@ def _body_en() -> str:
         "parliament-houses": _claim(
             "claim-parliament-houses",
             PARLIAMENT_WIKI,
-            "The bicameral parliament consists of the Dewan Rakyat and the "
-            "Dewan Negara.",
+            "The bicameral parliament consists of the Dewan Rakyat and the Dewan Negara.",
         ),
         "parliament-ydpa": _claim(
             "claim-parliament-ydpa",
@@ -436,8 +427,7 @@ def _body_en() -> str:
         "senate-term": _claim(
             "claim-senate-undissolved",
             PARLIAMENT_WIKI,
-            "The dissolution of the Parliament does not affect the Dewan "
-            "Negara.",
+            "The dissolution of the Parliament does not affect the Dewan Negara.",
         ),
         "pm-appoint": _claim(
             "claim-pm-appoint",
