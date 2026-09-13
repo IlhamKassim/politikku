@@ -375,13 +375,16 @@ _SCROLL_CSS = """
   .compass-dot[data-c="PH"] { left: 30%; top: 34%; background: #d7263d; }
   .compass-dot[data-c="BN"] { left: 58%; top: 36%; background: #1f9bd6; }
   .compass-dot[data-c="PN"] { left: 82%; top: 30%; background: #15387c; }
-  .compass-dot[data-c="GPS"] { left: 62%; top: 78%; background: #b8332e; }
-  .compass-dot[data-c="GRS"] { left: 48%; top: 84%; background: #e8772e; }
+  .compass-dot[data-c="GPS"] { left: 62%; top: 70%; background: #b8332e; }
+  .compass-dot[data-c="GRS"] { left: 42%; top: 78%; background: #e8772e; }
   .compass-you {
     background: var(--accent);
     color: #102018;
     border-color: var(--ink);
     z-index: 2;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
   }
   .compass-tools {
     display: grid;
