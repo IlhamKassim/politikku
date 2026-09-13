@@ -105,14 +105,12 @@ _HEDGES: tuple[str, ...] = (
     # Every inflection spelled out. Stemming these to "call" or "urg" would
     # be worse, not better: "called an election" is the real event, and
     # "urgent" would suppress a genuine report that happened to use the word.
+    # The urge inflections moved to _WORD_HEDGES below: spelled out is right,
+    # but they still have to be matched as words.
     "call for",
     "calls for",
     "called for",
     "calling for",
-    "urge",
-    "urges",
-    "urged",
-    "urging",
     "predict",
     "anticipat",
     "dijangka",
@@ -167,6 +165,20 @@ class Signal:
     sentence: str
 
 
+_WORD_HEDGES: tuple[re.Pattern[str], ...] = tuple(
+    re.compile(rf"\b{word}\b") for word in ("urge", "urges", "urged", "urging")
+)
+"""Hedges that must match as whole words, not as substrings.
+
+"urge" sits inside "surge", "surged" and "resurgence" — words a real report of
+a dissolution is likely to use, since that is what coverage of a called
+election talks about. As a plain substring it threw away exactly the sentence
+it exists to let through: "Parliament was dissolved as PN support surged."
+The Malay hedges stay substrings above: "gesa" has to keep covering
+"menggesa" and "gesaan", and nothing common hides it inside another word.
+"""
+
+
 def _sentences(text: str) -> list[str]:
     """Split on the original text, not a lowercased copy: the matching is
     case-insensitive, but the sentence goes into a message a human reads to
@@ -177,6 +189,8 @@ def _sentences(text: str) -> list[str]:
 def _match(sentence: str, patterns: Sequence[re.Pattern[str]]) -> bool:
     lowered = sentence.lower()
     if any(hedge in lowered for hedge in _HEDGES):
+        return False
+    if any(hedge.search(lowered) for hedge in _WORD_HEDGES):
         return False
     if any(pattern.search(lowered) for pattern in _FUTURE_REFERENCE):
         return False
