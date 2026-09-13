@@ -153,6 +153,29 @@ def test_build_copies_the_observatory_runtime_and_image(tmp_path):
         "scrollcraft.js",
         "integrated.js",
         "skyline.png",
+        "skyline-768.webp",
+        "skyline-1024.webp",
+        "skyline-1280.webp",
+        "skyline-1536.webp",
         "icon.svg",
     ):
         assert (tmp_path / "assets" / "observatory" / name).is_file(), name
+
+
+def test_every_hero_image_width_is_served_from_the_site_root(tmp_path):
+    """The hero art is the page's heaviest download and its LCP element, so it
+    ships as three WebP widths behind a srcset with the PNG as the fallback. A
+    rewrite that only caught the first path left the other two pointing at
+    `assets/skyline-*.webp`, relative to whatever directory the page sits in —
+    404 on /ms/, and the browser silently falling back to the 2.2MB PNG."""
+    build_and_write_landing_pages(tmp_path)
+
+    for page in (tmp_path / "index.html", tmp_path / "ms" / "index.html"):
+        body = page.read_text()
+        picture = re.search(r"<picture>.*?</picture>", body, re.DOTALL)
+        assert picture, f"no <picture> in {page}"
+        markup = picture.group(0)
+        for width in (768, 1024, 1280, 1536):
+            assert f"/assets/observatory/skyline-{width}.webp" in markup
+        assert 'src="/assets/observatory/skyline.png"' in markup
+        assert '"assets/skyline' not in markup

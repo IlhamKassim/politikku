@@ -548,7 +548,11 @@ def _observatory_body(model: LandingModel | None, language: Language) -> str:
     form_start = body.index('<form class="lookup" novalidate>')
     form_end = body.index("</form>", form_start) + len("</form>")
     body = body[:form_start] + _observatory_lookup(language) + body[form_end:]
-    body = body.replace('src="assets/skyline.png"', 'src="/assets/observatory/skyline.png"')
+    # The hero art ships as one PNG plus three WebP widths behind a srcset, so
+    # rewrite the whole `assets/` prefix rather than the one filename: a phone
+    # that pulls the 768px WebP fetches 86KB where the PNG was 2.2MB, and the
+    # srcset stops silently pointing at nothing when a width is added.
+    body = body.replace("assets/skyline", f"{_OBSERVATORY_ASSET_PREFIX}skyline")
     body = body.replace("https://politikku.my/app/", APP_URL)
     body = body.replace("https://politikku.my/bills/", route(language, "bills/"))
     body = body.replace(
@@ -587,6 +591,10 @@ _OBSERVATORY_ASSETS = {
     "scrollcraft.js": _OBSERVATORY_PAGE / "scrollcraft.js",
     "scrollcraft.css": _OBSERVATORY_PAGE / "scrollcraft.css",
     "skyline.png": _OBSERVATORY_PAGE / "assets" / "skyline.png",
+    "skyline-768.webp": _OBSERVATORY_PAGE / "assets" / "skyline-768.webp",
+    "skyline-1024.webp": _OBSERVATORY_PAGE / "assets" / "skyline-1024.webp",
+    "skyline-1280.webp": _OBSERVATORY_PAGE / "assets" / "skyline-1280.webp",
+    "skyline-1536.webp": _OBSERVATORY_PAGE / "assets" / "skyline-1536.webp",
     "icon.svg": _OBSERVATORY_PAGE / "icon.svg",
     "base.css": _OBSERVATORY_SHARED / "base.css",
     "sans.woff2": _OBSERVATORY_SHARED / "sans.woff2",
