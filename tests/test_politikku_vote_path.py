@@ -1,8 +1,11 @@
 from datetime import date
+from pathlib import Path
 
 from lpa.config import load_election_status
 from lpa.politikku_shell import NAV_LINKS, Language
 from lpa.politikku_vote_path import PAGE_PATH, build_vote_path_page, write_vote_path_pages
+
+VOTE_PATH_JS = Path(__file__).resolve().parent.parent / "public" / "learn" / "vote-path.js"
 
 
 def _pages() -> tuple[str, str]:
@@ -38,8 +41,15 @@ def test_vote_path_has_attributed_why_and_long_act_six() -> None:
     assert "Dewan Negara was built for a federation" in en
     assert "Head of state, not a Seat" in en
     assert "A third branch, not this walkthrough" in en
-    assert "political compass" not in en.lower()
-    assert "simulator" not in en.lower()
+    assert 'id="act-4-years"' in en
+    assert 'id="act-4-compass"' in en
+    assert 'id="vote-sim"' in en
+    assert "political compass" in en.lower()
+    assert "legislature simulator" in en.lower()
+    assert 'src="/learn/vote-path.js"' in en
+    assert "113" in en
+    assert "Pakatan Rakyat" in en
+    assert "does not name a Coalition for you" in en
 
 
 def test_en_and_ms_are_different_copy() -> None:
@@ -48,6 +58,13 @@ def test_en_and_ms_are_different_copy() -> None:
     assert "Anda mengundi di suatu tempat" in ms
     assert en.count("data-claim") == ms.count("data-claim")
     assert en.count("data-claim") >= 20
+
+
+def test_vote_path_js_is_tracked() -> None:
+    text = VOTE_PATH_JS.read_text(encoding="utf-8")
+    assert "MAJORITY" in text
+    assert "vote-compass" in text
+    assert "data-sim-seats" in text
 
 
 def test_write_vote_path_pages(tmp_path) -> None:

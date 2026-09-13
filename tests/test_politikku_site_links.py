@@ -186,6 +186,11 @@ def rendered_site(tmp_path_factory) -> Path:
         "learn/live-figures.js",
         (REPO_ROOT / "public" / "learn" / "live-figures.js").read_text(),
     )
+    _write(
+        root,
+        "learn/vote-path.js",
+        (REPO_ROOT / "public" / "learn" / "vote-path.js").read_text(),
+    )
 
     page = _projection_model()
     projection_dir = PROJECTION_PREFIX.strip("/")
