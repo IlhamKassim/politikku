@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 2: The Hypothetical "Paid" Model</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <script src="../assets/quiz.js" defer></script>
+</head>
+<body>
+    <a href="../MISSION.md">← Back to Mission</a>
+    <h1>Lesson 2: The Hypothetical "Paid" Model</h1>
+
+    <p>You asked a great question: <em>"What would the paid version be?"</em></p>
+    
+    <p>If we abandoned our zero-cost architectural rule (<a href="../RESOURCES.md">ADR 0002</a>) and had a budget of thousands of Ringgit per month, we would move from a simple <strong>Swing Model</strong> to a true <strong>Predictive Forecast</strong>. Here is what that would look like in practice:</p>
+    
+    <h2>1. MRP (Multilevel Regression and Poststratification)</h2>
+    <p>Instead of applying a uniform swing across a whole state, we would use MRP—the gold standard in modern election forecasting. We would commission expensive, large-scale national polls to ask: <em>"How are 18-25 year-old urban Malays voting?"</em> or <em>"How are middle-income rural Chinese voting?"</em> We would then match those demographic shifts to the exact census data of every individual constituency.</p>
+
+    <h2>2. Probabilistic Monte Carlo Simulations</h2>
+    <p>Our current model uses deterministic arithmetic (Baseline + Swing = Seat Call). A paid version would run thousands of simulated elections every day on powerful cloud servers. Instead of saying "Coalition A wins Muar by 2%", it would say "Coalition A has an 82% probability of winning Muar."</p>
+
+    <h2>3. Proprietary Data Firehoses</h2>
+    <p>Currently, we scrape open news headlines for <span class="concept">Sentiment</span>. A paid version would subscribe to expensive API firehoses (like X/Twitter, Meta, or TikTok analytics) and private daily tracking polls to get real-time, highly accurate voter intent data.</p>
+
+    <div class="alert">
+        <strong>Why we don't do this:</strong> Beyond the financial cost, a paid model introduces complexity that is hard to verify. Our current Swing Model is completely transparent: anyone can look at the math and see exactly why a seat was called a certain way (<a href="../RESOURCES.md">ADR 0005</a>).
+    </div>
+
+    <div class="quiz-widget">
+        <div class="quiz-question">Knowledge Check: How would a "paid" model treat two constituencies in the same state (e.g., Muar and Pagoh in Johor) differently than our current Swing Model?</div>
+        <div class="quiz-options">
+            <div class="quiz-option" data-correct="false" data-explanation="Incorrect. Both models would use the historical GE15 baseline as a starting point.">
+                A) It would ignore their GE15 baselines entirely.
+            </div>
+            <div class="quiz-option" data-correct="true" data-explanation="Correct! A paid MRP model would apply different shifts to Muar and Pagoh based on their unique demographic makeups, whereas our current model applies the exact same uniform state swing to both.">
+                B) It would apply different demographic shifts to each seat based on their specific census data.
+            </div>
+            <div class="quiz-option" data-correct="false" data-explanation="Incorrect. While it might run simulations, the key difference at the seat level is demographic targeting, not just random assignment.">
+                C) It would randomly assign one seat to the Government Coalition and one to the Non-government Coalition.
+            </div>
+        </div>
+        <div class="quiz-feedback"></div>
+    </div>
+
+    <p><em>Have questions about this lesson? Ask your agent in the chat!</em></p>
+</body>
+</html>

@@ -146,3 +146,29 @@ public/release.json
 # What the pipeline found in the day's coverage, for the alert step to read.
 # A working file passed between two steps of one run, never committed.
 dissolution-signals.json
+
+# The Observatory assets `politikku_landing.py` copies out of
+# `scrollcraft/builds/` at render time. Same reasoning as `public/app/` and
+# the rendered pages above: build output, rebuilt every run, and the sources
+# it is copied from are tracked.
+public/assets/
+
+# npm dependencies for the scrollcraft page builds. 9.6MB, restorable with
+# `npm ci` from the committed lockfile.
+scrollcraft/node_modules/
+
+# `uv run` writes this on every local test pass. CI never reads it — every
+# workflow installs with plain `pip install -e`, so a committed lock would
+# claim a reproducibility the pipeline does not actually use.
+uv.lock
+
+# Local scratch: PDFs pulled down while working, throwaway audit output.
+tmp/
+lighthouse-report.json
+
+# Large binaries kept beside the working tree, not shipped by any build.
+*.zip
+
+# A third-party Claude plugin installed beside the tree, with its own LICENSE
+# and marketplace manifest. Installed software, not this repo's code.
+tools/scroll-craft/

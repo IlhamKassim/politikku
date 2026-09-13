@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference: Election Model Glossary</title>
+    <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+    <h1>Election Model Glossary</h1>
+    <p>This is a quick reference guide to the core terms used in the <strong>PolitikKu</strong> election model.</p>
+    
+    <div class="card">
+        <h2 class="concept" id="baseline">Baseline</h2>
+        <p>The historical fact. Specifically, the GE15 federal results for all 222 Seats. This acts as the starting point for any projection.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="concept" id="swing-model">Swing Model</h2>
+        <p>The method for turning Sentiment into a per-Seat or per-Coalition Swing. It applies a <strong>uniform swing within each state</strong>, blended with any State Election Signal for the state that voted. It is NOT fitted to demographic data per seat.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="concept" id="sentiment">Sentiment</h2>
+        <p>The measured public political mood, derived from open-source News Sentiment and Poll Calibration. It's the input signal that drives the Swing Model.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="concept" id="seat-call">Seat Call</h2>
+        <p>The projected outcome for a single Seat (e.g. which Coalition wins, and the margin). <strong>Crucially:</strong> A Seat Call is pure arithmetic (Baseline + Uniform State Swing), <em>never</em> a bespoke judgement about that specific constituency.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="concept" id="projection">Projection</h2>
+        <p>The tool's output based on the model. We use "Projection", never "Prediction" or "Forecast", to reflect that the model uses provisional constants and is not statistically calibrated for high precision.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="concept" id="mrp">MRP (Multilevel Regression and Poststratification)</h2>
+        <p>The gold standard for modern predictive election forecasting. It combines large-scale polling with granular census data to predict shifts based on specific demographic groups per constituency. We specifically <strong>avoid</strong> this in favor of the Swing Model due to its high cost and lack of pure arithmetic transparency.</p>
+    </div>
+</body>
+</html>
