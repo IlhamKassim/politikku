@@ -24,7 +24,7 @@ def test_vote_path_is_scrollcraft_and_in_nav() -> None:
         assert 'class="pk-bare"' in page
         assert 'class="scene"' in page
         assert 'class="split-card"' in page
-        assert 'id="act-6"' in page
+        assert 'id="play-4"' in page
         assert "data-claim" in page
         assert "Kuala Lumpur" in page
         assert "Labuan" in page
@@ -34,28 +34,48 @@ def test_vote_path_is_scrollcraft_and_in_nav() -> None:
     assert any(link.key == "vote-path" and link.href == PAGE_PATH for link in NAV_LINKS)
 
 
-def test_vote_path_has_attributed_why_and_long_act_six() -> None:
+def test_vote_path_is_four_plays() -> None:
     en, _ = _pages()
-    assert "Why this count" in en
-    assert "Why a Government Coalition" in en
-    assert "Dewan Negara was built for a federation" in en
-    assert "Head of state, not a Seat" in en
-    assert "A third branch, not this walkthrough" in en
-    assert 'id="act-4-years"' in en
-    assert 'id="act-4-compass"' in en
+    assert 'id="play-1"' in en
+    assert 'id="play-2"' in en
+    assert 'id="play-3"' in en
+    assert 'id="play-4"' in en
+    assert 'id="vote-race"' in en
     assert 'id="vote-sim"' in en
+    assert 'id="vote-bill"' in en
+    assert 'id="play-compass"' in en
+    assert "Why this count" in en
+    assert "why-tap" in en
+    assert "teaching Bill" in en
+    assert "Campus Vote Bill" in en
+    assert "Rang Undang-Undang Undi Kampus" not in en
+    assert "bill-stage" in en
+    assert "bill-continue" in en
+    assert "data-div-floor" in en
+    assert "claim-undi18-unanimous" in en
+    assert "action=raw&amp;section=" in en
+    assert "action=raw&section=" not in en
+    assert "Need 112 first" not in en
+    assert "Open the failed bill" in en
+    assert "text-transform: lowercase" not in en
+    assert "More info" in en
     assert "political compass" in en.lower()
-    assert "legislature simulator" in en.lower()
     assert 'src="/learn/vote-path.js"' in en
-    assert "113" in en
     assert "Pakatan Rakyat" in en
     assert "will not name a Coalition for you" in " ".join(en.split())
+    assert 'id="course-board"' not in en
+    assert "data-proto-switch" not in en
+    assert "You are watching" in en
 
 
 def test_en_and_ms_are_different_copy() -> None:
     en, ms = _pages()
-    assert "You vote in a place" in en
-    assert "Anda mengundi di suatu tempat" in ms
+    assert "Your place" in en
+    assert "Tempat anda" in ms
+    assert "Campus Vote Bill" in en
+    assert "Rang Undang-Undang Undi Kampus" in ms
+    assert "Buka Rang Undang-Undang yang gagal" in ms
+    assert "Open the failed bill" not in ms
     assert en.count("data-claim") == ms.count("data-claim")
     assert en.count("data-claim") >= 20
 
@@ -64,7 +84,16 @@ def test_vote_path_js_is_tracked() -> None:
     text = VOTE_PATH_JS.read_text(encoding="utf-8")
     assert "MAJORITY" in text
     assert "vote-compass" in text
-    assert "data-sim-seats" in text
+    assert "data-sim-year" in text
+    assert "data-race" in text
+    assert "data-bill-next" in text
+    assert "data-div-floor" in text
+    assert "Need 112 first" not in text
+    assert 'stack.innerHTML = \'<div class="stack-bar">\' + html + "</div>"' in text
+    assert "dataset.variant" not in text
+    assert "course-board" not in text
+    assert "initCourseBoard" not in text
+    assert "js-ready" in text
 
 
 def test_write_vote_path_pages(tmp_path) -> None:
