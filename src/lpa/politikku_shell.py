@@ -697,10 +697,6 @@ def render_methodology_footer(
         )
     )
 
-    # The mark is published by the landing build, which copies the Observatory
-    # assets into /assets/observatory/. Every run that renders these pages
-    # renders the landing page too, so the file is always there beside them.
-    supported_by = html.escape(t(language, "Supported by", "Disokong oleh"))
     factual_heading = html.escape(t(language, factual.heading, factual.heading_ms))
     modelled_heading = html.escape(t(language, modelled.heading, modelled.heading_ms))
     return f"""<footer class="pk-footer">
@@ -717,10 +713,6 @@ def render_methodology_footer(
   <div class="pk-footer-col">
     <div class="pk-footer-label">{modelled_heading}</div>
     <div class="pk-footer-list">{modelled_items}</div>
-  </div>
-  <div class="pk-footer-supporter">
-    <span>{supported_by}</span>
-    <a href="https://krackeddevs.com/" target="_blank" rel="noopener"><img src="/assets/observatory/krackeddevs.svg" width="1640" height="700" alt="KrackedDevs" loading="lazy"></a>
   </div>
 </footer>""".strip()
 
@@ -1991,39 +1983,6 @@ button.dewan-tr:hover {
     margin-bottom: 8px;
   }
   .pk-footer-statement p { margin: 0; font-size: 12.5px; line-height: 1.6; }
-  /* These pages already sit on #101e23, the dark ground the KrackedDevs mark
-     is drawn for, so it needs no chip here — unlike the landing page's lime
-     footer. Spans the grid so it reads as one line under the columns. */
-  .pk-footer-supporter {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-top: 22px;
-    border-top: 1px solid var(--line);
-  }
-  .pk-footer-supporter > span {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--on-dark-body);
-  }
-  /* Padding carries the tap target's width the way .pk-footer-link above
-     does, and the negative margin keeps the mark flush with the label
-     despite it. The bare mark is only 42px wide — under the 44px minimum. */
-  .pk-footer-supporter a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    min-width: 44px;
-    padding: 0 14px;
-    margin-left: -14px;
-    opacity: 0.85;
-    transition: opacity 0.2s;
-  }
-  .pk-footer-supporter a:hover, .pk-footer-supporter a:focus-visible { opacity: 1; }
-  .pk-footer-supporter img { height: 18px; width: auto; display: block; }
   .pk-not-calibrated { color: var(--caution); }
   /* The link box has to be tall enough to hit with a thumb, so padding
      carries the height rather than the line box. The negative left margin
