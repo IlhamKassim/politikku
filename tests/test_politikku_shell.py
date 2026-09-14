@@ -502,3 +502,14 @@ def test_the_open_mobile_menu_is_sized_off_the_viewport():
 
     assert "height: calc(100vh - 56px);" in _CSS_TEMPLATE
     assert "bottom: 0;\n      background: var(--paper); z-index: 99;" not in _CSS_TEMPLATE
+
+
+def test_the_methodology_footer_credits_krackeddevs_in_both_languages():
+    """This footer carries /pru16/, /methodology.html and the learn pages. Those
+    all sit on #101e23 already, the ground the mark is drawn for, so it needs no
+    chip here — only the landing page's lime footer does."""
+    for language, label in ((Language.EN, "Supported by"), (Language.MS, "Disokong oleh")):
+        footer = render_methodology_footer(language=language)
+        assert label in footer
+        assert 'href="https://krackeddevs.com/" target="_blank" rel="noopener"' in footer
+        assert 'src="/assets/observatory/krackeddevs.svg"' in footer
