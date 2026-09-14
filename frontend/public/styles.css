@@ -6199,6 +6199,79 @@ body.politicians-open #top-controls { display: none; }
   #mobile-menu { max-height: calc(100dvh - 84px); overflow-y: auto; background: var(--panel); }
   #mobile-menu .topicons > a, #mobile-menu #top-map { display: none; }
 }
+
+/* =================================================================
+   MODERN CSS TRANSITIONS (Hardware-accelerated dialogs + view morph)
+   ================================================================= */
+
+/* Smooth dialog entrance/exit via @starting-style and allow-discrete */
+dialog.pol-modal,
+dialog.card-preview {
+  opacity: 0;
+  transform: scale(0.97) translateY(6px);
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out),
+    overlay 180ms allow-discrete,
+    display 180ms allow-discrete;
+}
+
+dialog.pol-modal[open],
+dialog.card-preview[open] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+@starting-style {
+  dialog.pol-modal[open],
+  dialog.card-preview[open] {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+}
+
+dialog.pol-modal::backdrop,
+dialog.card-preview::backdrop {
+  opacity: 0;
+  transition:
+    opacity 180ms var(--ease-out),
+    overlay 180ms allow-discrete,
+    display 180ms allow-discrete;
+}
+
+dialog.pol-modal[open]::backdrop,
+dialog.card-preview[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  dialog.pol-modal[open]::backdrop,
+  dialog.card-preview[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* View Transitions: keep topbar and sidebar stable while content morphs */
+#sidebar {
+  view-transition-name: sidebar-rail;
+}
+#topbar {
+  view-transition-name: topbar-strip;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(sidebar-rail),
+::view-transition-new(sidebar-rail),
+::view-transition-old(topbar-strip),
+::view-transition-new(topbar-strip) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

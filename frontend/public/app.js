@@ -1007,7 +1007,14 @@ function renderPoliticiansDirectory(keepQuery = "") {
       <p class="pol-dir-src">${esc(t(srcKey))}</p>
     </div>`;
   renderPoliticiansBody();
-  document.getElementById("pol-back")?.addEventListener("click", () => { closePoliticians({ silent: true }); hideInfo(); backToControls(); syncSidebar(); });
+  document.getElementById("pol-back")?.addEventListener("click", () => {
+    withViewTransition(() => {
+      closePoliticians({ silent: true });
+      hideInfo();
+      backToControls();
+      syncSidebar();
+    });
+  });
   if (!pledgesMode) {
     const s = document.getElementById("pol-search");
     s && s.addEventListener("input", renderPoliticiansBody);
@@ -1508,6 +1515,13 @@ function animationDone(animation, duration) {
 }
 
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
+function withViewTransition(domUpdate) {
+  if (typeof document !== "undefined" && document.startViewTransition && !ANIM_OFF && !REDUCE_MOTION.matches) {
+    return document.startViewTransition(domUpdate);
+  }
+  return domUpdate();
+}
 
 function setPanelView(view) {
   PANEL.classList.toggle("empty", view === "overview");
@@ -4639,14 +4653,20 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     return;
   }
   if (ev.target.closest("#sb-brand") || ev.target.closest("#sb-map")) {
-    closeOtherPages(); hideInfo(); backToControls(); syncSidebar(); return;
+    withViewTransition(() => {
+      closeOtherPages();
+      hideInfo();
+      backToControls();
+      syncSidebar();
+    });
+    return;
   }
   const sbPol = ev.target.closest("#sb-politicians");
   if (sbPol) {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openPoliticians();
+    withViewTransition(() => openPoliticians());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4655,7 +4675,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openDewanPage();
+    withViewTransition(() => openDewanPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4664,7 +4684,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openBillsPage();
+    withViewTransition(() => openBillsPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4673,7 +4693,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openSentimentPage();
+    withViewTransition(() => openSentimentPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4682,7 +4702,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openProjectionPage();
+    withViewTransition(() => openProjectionPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4691,7 +4711,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openMethodologyPage();
+    withViewTransition(() => openMethodologyPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4700,7 +4720,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openGlossaryPage();
+    withViewTransition(() => openGlossaryPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4709,7 +4729,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openCoalitionsPage();
+    withViewTransition(() => openCoalitionsPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -4718,7 +4738,7 @@ document.getElementById("sidebar")?.addEventListener("click", (ev) => {
     if (!isPlainLeftClick(ev)) return;
     ev.preventDefault();
     hideInfo();
-    openProcessPage();
+    withViewTransition(() => openProcessPage());
     setTimeout(syncSidebar, 60);
     return;
   }
@@ -5071,7 +5091,14 @@ function closeDewanPage(options = {}) {
 }
 
 DEWAN_VIEW?.addEventListener("click", (e) => {
-  if (e.target.closest("[data-dewan-back]")) { closeDewanPage({ silent: true }); backToControls(); syncSidebar(); return; }
+  if (e.target.closest("[data-dewan-back]")) {
+    withViewTransition(() => {
+      closeDewanPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
+    return;
+  }
   const sortBtn = e.target.closest("[data-dewan-sort]");
   if (sortBtn) {
     dewanSort = sortBtn.dataset.dewanSort;
@@ -5270,9 +5297,11 @@ function closeBillsPage(options = {}) {
 
 BILLS_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-bills-back]")) {
-    closeBillsPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeBillsPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
   const sortBtn = e.target.closest("[data-bills-sort]");
@@ -5411,9 +5440,11 @@ function closeSentimentPage(options = {}) {
 
 SENTIMENT_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-sentiment-back]")) {
-    closeSentimentPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeSentimentPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
 });
@@ -5737,9 +5768,11 @@ function closeProjectionPage(options = {}) {
 
 PROJECTION_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-proj-back]")) {
-    closeProjectionPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeProjectionPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
   const sortBtn = e.target.closest("[data-proj-sort]");
@@ -5820,9 +5853,11 @@ function closeMethodologyPage(options = {}) {
 
 METHODOLOGY_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-methodology-back]")) {
-    closeMethodologyPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeMethodologyPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
 });
@@ -5881,9 +5916,11 @@ function closeGlossaryPage(options = {}) {
 
 GLOSSARY_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-glossary-back]")) {
-    closeGlossaryPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeGlossaryPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
 });
@@ -5942,9 +5979,11 @@ function closeCoalitionsPage(options = {}) {
 
 COALITIONS_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-coalitions-back]")) {
-    closeCoalitionsPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeCoalitionsPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
 });
@@ -6003,9 +6042,11 @@ function closeProcessPage(options = {}) {
 
 PROCESS_VIEW?.addEventListener("click", (e) => {
   if (e.target.closest("[data-process-back]")) {
-    closeProcessPage({ silent: true });
-    backToControls();
-    syncSidebar();
+    withViewTransition(() => {
+      closeProcessPage({ silent: true });
+      backToControls();
+      syncSidebar();
+    });
     return;
   }
 });

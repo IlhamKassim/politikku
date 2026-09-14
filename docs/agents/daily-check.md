@@ -178,12 +178,11 @@ record.
   live push notification, caught by the user rather than this skill.
   `SKILL.md`'s address-pass prompt and step 7 now both name `ruff format
   --check` explicitly rather than leaving "ruff" ambiguous between the two.
-- **Antigravity workers can't push — Claude does, after independently
-  verifying.** `AGENTS.md`'s rule 3 ("Never push... local commits only when
-  requested") predates this skill and applies to every Antigravity dispatch
-  in this repo, address-pass fixes included. `SKILL.md`'s worker prompt
-  says commit-only for this reason; pushing a verified commit is Claude's
-  job in step 7, same trust boundary as verifying the fix itself.
+- **Antigravity workers commit locally only — Claude pushes, after independently
+  verifying.** While `AGENTS.md` now permits PRs and merges when requested,
+  worker prompts in this skill stay commit-only: pushing a verified commit is
+  Claude's job in step 7, maintaining the trust boundary of independent
+  verification before remote updates.
 - **Two workers editing the same shared working directory at once can
   produce transient, unrelated test failures.** The first real run's
   address pass had both workers fixing issues concurrently in the same

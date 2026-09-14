@@ -12,10 +12,12 @@ This is a **single-context repository**. Before exploring or proposing changes, 
 - **`CONTEXT.md`** at the repository root: Canonical domain glossary (*Coalition*, *Seat*, *Majority*, *Government Coalition*, *Non-government*, *Baseline*, *Sentiment*, *Swing*, *State Election Signal*, *Election Status*, *Swing Model*, *Projection*, *Seat-Level Projection*, *Seat Call*, *Postcode → Seat Index*, *MP Profile*, *Division*, *Bill*, *Audience*, *Return Trigger*).
   - Use exact terms from `CONTEXT.md`. Never invent or drift to avoided synonyms (e.g., avoid "prediction", "forecast", "opposition", "alliance").
   - Every Seat Call is arithmetic against the GE15 Baseline, never a bespoke judgement about that constituency.
-- **`docs/adr/`**: Architecture Decision Records.
+- **`docs/adr/`**: Architecture Decision Records (ADRs 0001–0019).
   - **ADR 0002 / ADR 0006 / ADR 0007**: Zero recurring cost by default, static HTML generation for the public site, no paid external APIs for pipeline runs.
   - **ADR 0003**: Model is provisional and uncalibrated; never frame projections as predictions.
   - **ADR 0008 / 0009 / 0010**: Sourcing rules for postcodes, MP profiles, and parliamentary bill tracking.
+  - **ADR 0015 / ADR 0019**: Surviving visual design system. The Observatory palette (ink `#101e23`, paper text `#edf1df`, lime `#d6ed9a`, Space Grotesk display face, dark-only, flat decoration) replaces older near-black, serif, and paper skins.
+  - **ADR 0016 / ADR 0017 / ADR 0018**: Single source of truth for navigation links (`nav-links`), orientation gate, and build-time prerendering.
 - If your work contradicts an ADR or requires a new domain term, flag it explicitly to the user.
 
 ---
@@ -26,7 +28,7 @@ This is a **single-context repository**. Before exploring or proposing changes, 
 2. **No destructive git commands**: Never execute destructive git actions (`reset --hard`, `clean -f`, `checkout --`, force-push, branch deletion) without explicit user instructions.
 3. **Zero recurring cost**: Never introduce dependencies or integrations that require paid API calls or persistent hosted compute without explicit user sign-off (ADR 0002 / 0007).
 4. **Workspace confinement**: Stay strictly within this repository's working tree.
-5. **Verify mechanically**: Always run `.venv/bin/pytest` and linter checks (`ruff check`, `mypy`) before claiming a task is done. Never claim success from narrative alone if tests have not passed.
+5. **Verify mechanically**: Always run `.venv/bin/pytest` and full CI checks (`.venv/bin/ruff check .`, `.venv/bin/ruff format --check .`, `.venv/bin/mypy src scripts/deepseek_agent.py`) before claiming a task is done. For TypeScript changes, run `npm run typecheck && npm run lint && npm test` in `ts/`. Never claim success from narrative alone if checks have not passed.
 
 ---
 
@@ -62,20 +64,22 @@ Issues live on GitHub (`IlhamKassim/live-political-analysis`) managed via the `g
 
 - **Civic Education Content**: Any page under `public/learn/` must be verified using `python -m lpa.citation_check public/learn/<page>.html` before it counts as done (`.agents/skills/citation-check/SKILL.md`).
 - **Mechanical Task Delegation**: Spec-pinned, mechanical code-writing and test boilerplate can be delegated to `scripts/deepseek_agent.py` in an isolated git worktree (`.agents/skills/deepseek-agent/SKILL.md`).
+- **Daily Check Bug Hunt**: Attended, diff-scoped bug hunts run two Antigravity workers on Gemini 3.8 Flash (Standards pass and Correctness pass) to review diffs since `last-bug-review` (`.agents/skills/daily-check/SKILL.md`, `docs/agents/daily-check.md`).
 - **Session & Context Monitoring**: Inspect active token context and session metrics anytime via `python scripts/session_status.py` (`.agents/skills/session-status/SKILL.md`).
 - **Context & Quota Status Bar**: Every response must conclude with a standardized context and quota status bar footer so the user can always see current session token usage and remaining CLI quota, formatted as:
   `---`
   `[Context: <used>% (~<tokens>k / <max>k tokens) | <Model>] [Quota Remaining: 5h: <pct>% | Weekly: <pct>%]`
-- **UI/UX Improvement Work**: `mypolitik`'s frontend design system
-  (`docs/design/mypolitik-new-views-spec.md`) is the surviving visual
-  direction — see ADR 0012. `docs/design/ui-ux-brief.md` is retired.
+- **UI/UX Design System**: The Observatory design system (ADR 0019 amending ADR 0015) is the surviving visual direction: ink `#101e23`, surfaces `#16272c`/`#192b30`, paper text `#edf1df`, lime `#d6ed9a`, Space Grotesk display font, dark-only. Earlier mockups, Redaction fonts, and light themes are retired.
+- **Unslop Writing Discipline**: Cut AI writing tells across all prose, documentation, and communication (`.agents/skills/unslop/SKILL.md`).
+- **Teaching Workspace**: Interactive learning modules and lessons live in `teaching/` (`.agents/skills/teach/SKILL.md`).
 
 ---
 
 ## 6. Plain & Easy Language
 
-All agent answers and explanations across every session must use plain, easy-to-understand language:
+All agent answers and explanations across every session must follow the `unslop` discipline (`.agents/skills/unslop/SKILL.md`) using plain, easy-to-understand language:
 - **Simple Phrasing**: Explain technical concepts, reasoning, and code changes simply and directly. Avoid unnecessarily dense academic jargon, complex nested clauses, and verbose filler.
 - **Short Sentences**: Keep sentences concise and clear. Prefer one idea per sentence.
 - **Clear Domain Explanations**: While strictly using the exact canonical domain terms from `CONTEXT.md` (*Seat*, *Majority*, *Government Coalition*, *Projection*, *Seat Call*), explain what they mean in everyday language whenever helpful.
 - **Concrete & Direct**: Say plainly what was done, what changed, or what needs to be done next without unnecessary fluff.
+- **Cut AI Tells**: Avoid em dashes entirely (use periods or commas). Cut puffery ("pivotal", "evolving landscape"), fancy ways to say "is", and vague passive attributions.

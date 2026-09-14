@@ -6,7 +6,7 @@ See [GEMINI.md](file:///Users/hamboii/code/live-political-analysis/GEMINI.md) fo
 1. **Domain Terms**: Use terms from `CONTEXT.md` exactly. Avoid synonyms (e.g. use "Seat", "Majority", "Government Coalition", "Projection", "Seat Call").
 2. **Zero Cost**: Keep all runtime operations zero recurring cost (ADR 0002/0007).
 3. **Safety**: The agent can open PRs and merge code when requested. Never perform destructive git actions (e.g. force-push, reset --hard).
-4. **Verification**: Verify all changes with `.venv/bin/pytest` before claiming completion.
+4. **Verification**: Verify all changes mechanically (`.venv/bin/ruff check .`, `.venv/bin/ruff format --check .`, `.venv/bin/mypy src scripts/deepseek_agent.py`, and `.venv/bin/pytest`) before claiming completion.
 5. **Model Tiering**: Cheap model (`flash`/`inherit`) by default; escalate to `pro` only for visual design, sensitive political editorial judgment, security/correctness-critical engineering, or irreversible operations (`docs/agents/model-effort.md`).
 6. **Context Bar**: Conclude every response with the standardized context and quota status bar footer (`[Context: ... | <Model>] [Quota Remaining: ...]`).
 7. **Easy Language**: Use simple, plain, and accessible language in all responses and explanations. Avoid unnecessarily dense academic jargon or convoluted prose.
