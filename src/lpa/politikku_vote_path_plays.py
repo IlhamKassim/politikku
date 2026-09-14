@@ -7,9 +7,7 @@ from collections.abc import Callable
 ClaimFn = Callable[[str, str, str], str]
 StackFn = Callable[[tuple[tuple[str, int, str], ...]], str]
 
-CONTEXT_MD = (
-    "https://raw.githubusercontent.com/IlhamKassim/live-political-analysis/main/CONTEXT.md"
-)
+CONTEXT_MD = "https://raw.githubusercontent.com/IlhamKassim/live-political-analysis/main/CONTEXT.md"
 
 
 def _wiki_raw(title: str, section: int) -> str:
@@ -31,12 +29,8 @@ DEWAN_RAKYAT_LEAD = _wiki_raw("Dewan_Rakyat", 0)
 DEWAN_RAKYAT_POWERS = _wiki_raw("Dewan_Rakyat", 3)
 ELECTIONS_LEAD = _wiki_raw("Elections_in_Malaysia", 0)
 ELECTIONS_FEDERAL = _wiki_raw("Elections_in_Malaysia", 2)
-GE15_RESULT = (
-    "https://en.wikipedia.org/wiki/2022_Malaysian_general_election?action=render"
-)
-STATES_WIKI = (
-    "https://en.wikipedia.org/wiki/States_and_federal_territories_of_Malaysia?action=raw"
-)
+GE15_RESULT = "https://en.wikipedia.org/wiki/2022_Malaysian_general_election?action=render"
+STATES_WIKI = "https://en.wikipedia.org/wiki/States_and_federal_territories_of_Malaysia?action=raw"
 UNDI18_WIKI = "https://en.wikipedia.org/wiki/UNDI18?action=raw"
 GE13_WIKI = "https://en.wikipedia.org/wiki/2013_Malaysian_general_election?action=raw"
 GE14_WIKI = "https://en.wikipedia.org/wiki/2018_Malaysian_general_election?action=raw"
@@ -140,7 +134,7 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
                 "setuju, ke kanan saya. Yang tidak, ke kiri saya. Kita akan "
                 "kira.",
             )
-            +             '<p class="bill-note">Anda menonton. Satu orang tidak memusingkan '
+            + '<p class="bill-note">Anda menonton. Satu orang tidak memusingkan '
             "belah bahagian. 112 Kerusi yang memusingkannya. Rumah pengajaran "
             "ini merawat Gabungan Kerajaan sebagai mengundi ya. Itu whip, "
             "bukan undang-undang.</p>"
@@ -154,8 +148,8 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
                 senator,
                 "Pilihan raya umum tidak menghantar saya pulang.",
             )
-            + f"<p class=\"prose-claim\">{c['senate-term']}</p>"
-            + f"<p class=\"more\">{c['senate-70']}</p>"
+            + f'<p class="prose-claim">{c["senate-term"]}</p>'
+            + f'<p class="more">{c["senate-70"]}</p>'
         )
         assent = (
             _speech(
@@ -163,8 +157,8 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
                 "Jika kedua-dua dewan lulus, Rang Undang-Undang pergi kepada "
                 "Yang di-Pertuan Agong.",
             )
-            + f"<p class=\"prose-claim\">{c['assent']}</p>"
-            + f"<p class=\"more\">{c['ydpa-head']}</p>"
+            + f'<p class="prose-claim">{c["assent"]}</p>'
+            + f'<p class="more">{c["ydpa-head"]}</p>'
         )
         law = (
             "<p>Jika pihak ya memegang 112 Kerusi, ini laluan itu.</p>"
@@ -177,7 +171,7 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             "<p>Pihak ya tidak sampai 112 Kerusi. Rang Undang-Undang mati di "
             "Dewan Rakyat. Peraturan kekal seperti sedia ada.</p>"
             "<p>Menteri ada tiga pilihan:</p>"
-            "<ol class=\"bill-choices\">"
+            '<ol class="bill-choices">'
             "<li>Tinggalkan Rang Undang-Undang.</li>"
             "<li>Cuba lagi, dan pujuk lebih banyak Kerusi.</li>"
             "<li>Ubah teks, kemudian cuba lagi.</li>"
@@ -186,12 +180,12 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
         coda = (
             "<p>Permainan itu fiksyen. Tulisan semula siapa boleh mengundi "
             "benar-benar berlaku.</p>"
-            f"<p class=\"prose-claim\">{c['undi18-unanimous']} "
+            f'<p class="prose-claim">{c["undi18-unanimous"]} '
             "Tiada pecahan.</p>"
-            f"<p class=\"prose-claim\">{c['undi18-age']}</p>"
-            f"<p class=\"prose-claim\">{c['undi18-avr']}</p>"
-            f"<p class=\"prose-claim\">{c['undi18-two-thirds']}</p>"
-            "<p class=\"more\">Dua pertiga daripada 222 Kerusi ialah 148. "
+            f'<p class="prose-claim">{c["undi18-age"]}</p>'
+            f'<p class="prose-claim">{c["undi18-avr"]}</p>'
+            f'<p class="prose-claim">{c["undi18-two-thirds"]}</p>'
+            '<p class="more">Dua pertiga daripada 222 Kerusi ialah 148. '
             "Rang Undang-Undang Undi Kampus dalam permainan ini hanya "
             "perlu 112, kerana ia bukan pindaan perlembagaan.</p>"
         )
@@ -241,8 +235,7 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             )
             + _speech(
                 speaker,
-                "Clerk, read the title of the Bill. There is no debate at "
-                "first reading.",
+                "Clerk, read the title of the Bill. There is no debate at first reading.",
             )
             + _speech(
                 clerk,
@@ -258,8 +251,7 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             "live in now.",
         ) + _speech(
             back,
-            "A Seat is the people who live there this term. Not only the people "
-            "who grew up there.",
+            "A Seat is the people who live there this term. Not only the people who grew up there.",
         )
         opposition = _speech(
             opp,
@@ -292,17 +284,16 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
                 senator,
                 "A general election does not send me home.",
             )
-            + f"<p class=\"prose-claim\">{c['senate-term']}</p>"
-            + f"<p class=\"more\">{c['senate-70']}</p>"
+            + f'<p class="prose-claim">{c["senate-term"]}</p>'
+            + f'<p class="more">{c["senate-70"]}</p>'
         )
         assent = (
             _speech(
                 clerk,
-                "If both houses pass the Bill, it goes to the Yang di-Pertuan "
-                "Agong.",
+                "If both houses pass the Bill, it goes to the Yang di-Pertuan Agong.",
             )
-            + f"<p class=\"prose-claim\">{c['assent']}</p>"
-            + f"<p class=\"more\">{c['ydpa-head']}</p>"
+            + f'<p class="prose-claim">{c["assent"]}</p>'
+            + f'<p class="more">{c["ydpa-head"]}</p>'
         )
         law = (
             "<p>If the yes side holds 112 Seats, this is that path.</p>"
@@ -314,7 +305,7 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             "<p>The yes side did not reach 112 Seats. The Bill dies in the "
             "Dewan Rakyat. The rule stays as it is.</p>"
             "<p>The Minister has three choices:</p>"
-            "<ol class=\"bill-choices\">"
+            '<ol class="bill-choices">'
             "<li>Leave the Bill.</li>"
             "<li>Try again, and persuade more Seats.</li>"
             "<li>Change the text, then try again.</li>"
@@ -323,12 +314,12 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
         coda = (
             "<p>That play was fiction. A real rewrite of who can vote did "
             "happen.</p>"
-            f"<p class=\"prose-claim\">{c['undi18-unanimous']} "
+            f'<p class="prose-claim">{c["undi18-unanimous"]} '
             "There was no split.</p>"
-            f"<p class=\"prose-claim\">{c['undi18-age']}</p>"
-            f"<p class=\"prose-claim\">{c['undi18-avr']}</p>"
-            f"<p class=\"prose-claim\">{c['undi18-two-thirds']}</p>"
-            "<p class=\"more\">Two-thirds of 222 Seats is 148. The Campus "
+            f'<p class="prose-claim">{c["undi18-age"]}</p>'
+            f'<p class="prose-claim">{c["undi18-avr"]}</p>'
+            f'<p class="prose-claim">{c["undi18-two-thirds"]}</p>'
+            '<p class="more">Two-thirds of 222 Seats is 148. The Campus '
             "Vote Bill in this play only needed 112, because it was not a "
             "constitutional amendment.</p>"
         )
@@ -450,8 +441,7 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
         "ft-direct": claim(
             "claim-ft-direct",
             STATES_WIKI,
-            "The federal territories are directly governed by the federal "
-            "government.",
+            "The federal territories are directly governed by the federal government.",
         ),
         "fptp": claim(
             "claim-fptp",
@@ -650,26 +640,22 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
         "gps-position": claim(
             "claim-gps-position",
             GPS_WIKI,
-            "Gabungan Parti Sarawak's political position is centre-right to "
-            "right-wing.",
+            "Gabungan Parti Sarawak's political position is centre-right to right-wing.",
         ),
         "gps-sarawak": claim(
             "claim-gps-sarawak",
             GPS_WIKI,
-            "Gabungan Parti Sarawak is a Sarawak-based political alliance in "
-            "Malaysia.",
+            "Gabungan Parti Sarawak is a Sarawak-based political alliance in Malaysia.",
         ),
         "grs-position": claim(
             "claim-grs-position",
             GRS_WIKI,
-            "Gabungan Rakyat Sabah's political position is centre to "
-            "centre-right.",
+            "Gabungan Rakyat Sabah's political position is centre to centre-right.",
         ),
         "grs-sabah": claim(
             "claim-grs-sabah",
             GRS_WIKI,
-            "Gabungan Rakyat Sabah is a Malaysian coalition of Sabah-based "
-            "parties.",
+            "Gabungan Rakyat Sabah is a Malaysian coalition of Sabah-based parties.",
         ),
     }
     bar = _ge15_bar(stack_bar, colors)
