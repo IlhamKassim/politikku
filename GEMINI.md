@@ -22,7 +22,7 @@ This is a **single-context repository**. Before exploring or proposing changes, 
 
 ## 2. Strict Guardrails
 
-1. **No PRs or merges**: Never open a pull request or merge anything. Local commits only when explicitly instructed.
+1. **PRs and merges permitted**: The agent can open pull requests and merge code when requested. Never perform destructive git actions without explicit user instructions.
 2. **No destructive git commands**: Never execute destructive git actions (`reset --hard`, `clean -f`, `checkout --`, force-push, branch deletion) without explicit user instructions.
 3. **Zero recurring cost**: Never introduce dependencies or integrations that require paid API calls or persistent hosted compute without explicit user sign-off (ADR 0002 / 0007).
 4. **Workspace confinement**: Stay strictly within this repository's working tree.
