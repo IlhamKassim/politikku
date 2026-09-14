@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from html import escape
 
 ClaimFn = Callable[[str, str, str], str]
 StackFn = Callable[[tuple[tuple[str, int, str], ...]], str]
@@ -20,11 +21,9 @@ def _wiki_raw(title: str, section: int) -> str:
 
 
 POLITICS_LEAD = _wiki_raw("Politics_of_Malaysia", 0)
-POLITICS_JUDICIAL = _wiki_raw("Politics_of_Malaysia", 17)
 DUN_LEAD = _wiki_raw("State_legislative_assemblies_of_Malaysia", 0)
 DEWAN_NEGARA_LEAD = _wiki_raw("Dewan_Negara", 0)
 DEWAN_NEGARA_MEMBERSHIP = _wiki_raw("Dewan_Negara", 1)
-DEWAN_NEGARA_POWERS = _wiki_raw("Dewan_Negara", 2)
 DEWAN_RAKYAT_LEAD = _wiki_raw("Dewan_Rakyat", 0)
 DEWAN_RAKYAT_POWERS = _wiki_raw("Dewan_Rakyat", 3)
 ELECTIONS_LEAD = _wiki_raw("Elections_in_Malaysia", 0)
@@ -40,6 +39,34 @@ PN_WIKI = "https://en.wikipedia.org/wiki/Perikatan_Nasional?action=raw"
 BN_WIKI = "https://en.wikipedia.org/wiki/Barisan_Nasional?action=raw"
 GPS_WIKI = "https://en.wikipedia.org/wiki/Gabungan_Parti_Sarawak?action=raw"
 GRS_WIKI = "https://en.wikipedia.org/wiki/Gabungan_Rakyat_Sabah?action=raw"
+CONSTITUTION_ARTICLE_62 = "https://mylaw.my/legislation/federal-constitution-1957/article-62"
+CONSTITUTION_ARTICLE_66 = "https://mylaw.my/legislation/federal-constitution-1957/article-66"
+
+
+def _color_style(colors: dict[str, str]) -> str:
+    return ";".join(
+        f"--vote-{code.lower()}:{escape(color, quote=True)}" for code, color in colors.items()
+    )
+
+
+def _journey_next(
+    *,
+    eyebrow: str,
+    title: str,
+    href: str,
+    description: str,
+    links: tuple[tuple[str, str], ...],
+) -> str:
+    extra_links = "".join(
+        f'<a href="{escape(link_href, quote=True)}">{escape(label)} →</a>'
+        for link_href, label in links
+    )
+    return f"""<aside class="journey-next" aria-label="{escape(eyebrow, quote=True)}">
+      <div class="pk-eyebrow">{escape(eyebrow)}</div>
+      <h3><a href="{escape(href, quote=True)}">{escape(title)} →</a></h3>
+      <p>{escape(description)}</p>
+      <div class="journey-links">{extra_links}</div>
+    </aside>"""
 
 
 def _speech(role: str, text: str) -> str:
@@ -135,9 +162,11 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
                 "kira.",
             )
             + '<p class="bill-note">Anda menonton. Satu orang tidak memusingkan '
-            "belah bahagian. 112 Kerusi yang memusingkannya. Rumah pengajaran "
-            "ini merawat Gabungan Kerajaan sebagai mengundi ya. Itu whip, "
-            "bukan undang-undang.</p>"
+            "belah bahagian. Permainan ini menganggap semua 222 Ahli Parlimen "
+            "mengundi dan setiap Ahli daripada Gabungan Kerajaan yang dipilih "
+            "mengundi ya. Dengan 222 undi, 112 undi ya mengatasi 110 undi "
+            f"tidak. {c['bill-vote-rule']} Menganggap seluruh Gabungan mengundi "
+            "bersama ialah andaian whip, bukan undang-undang.</p>"
         )
         senate = (
             _speech(
@@ -161,14 +190,16 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             + f'<p class="more">{c["ydpa-head"]}</p>'
         )
         law = (
-            "<p>Jika pihak ya memegang 112 Kerusi, ini laluan itu.</p>"
+            "<p>Jika pihak ya mendapat sekurang-kurangnya 112 undi dalam "
+            "permainan yang mengira semua 222 Ahli ini, inilah laluannya.</p>"
             "<p>Dalam permainan ini, Rang Undang-Undang Undi Kampus menjadi "
             "undang-undang. Umur mengundi sebenar negara ini tidak berubah di "
             "sini.</p>"
         )
         failed = (
-            "<p>Jika pihak ya tidak memegang 112 Kerusi, ini laluan itu.</p>"
-            "<p>Pihak ya tidak sampai 112 Kerusi. Rang Undang-Undang mati di "
+            "<p>Jika pihak ya tidak mendapat 112 undi dalam permainan yang "
+            "mengira semua 222 Ahli ini, inilah laluannya.</p>"
+            "<p>Pihak ya tidak sampai 112 undi. Rang Undang-Undang mati di "
             "Dewan Rakyat. Peraturan kekal seperti sedia ada.</p>"
             "<p>Menteri ada tiga pilihan:</p>"
             '<ol class="bill-choices">'
@@ -184,10 +215,10 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             "Tiada pecahan.</p>"
             f'<p class="prose-claim">{c["undi18-age"]}</p>'
             f'<p class="prose-claim">{c["undi18-avr"]}</p>'
-            f'<p class="prose-claim">{c["undi18-two-thirds"]}</p>'
-            '<p class="more">Dua pertiga daripada 222 Kerusi ialah 148. '
-            "Rang Undang-Undang Undi Kampus dalam permainan ini hanya "
-            "perlu 112, kerana ia bukan pindaan perlembagaan.</p>"
+            '<p class="more">Permainan ini menggunakan 112 kerana ia mengira '
+            "semua 222 Ahli Parlimen sebagai mengundi. Pindaan perlembagaan "
+            "boleh mempunyai ambang berbeza. Dua pertiga daripada 222 "
+            f"Kerusi ialah 148. {c['undi18-two-thirds']}</p>"
         )
         cont = "Teruskan"
         divide = "Pecahkan dewan"
@@ -272,8 +303,11 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
                 "will count.",
             )
             + '<p class="bill-note">You are watching. One person does not swing '
-            "a Division. 112 Seats do. This teaching house treats the "
-            "Government Coalition as voting yes. That is a whip, not a law.</p>"
+            "a Division. This play assumes all 222 MPs vote and every MP in "
+            "the selected Government Coalition votes yes. With 222 votes, "
+            f"112 yes votes beat 110 no votes. {c['bill-vote-rule']} Treating "
+            "a whole Coalition as voting together is a whip assumption, not "
+            "a law.</p>"
         )
         senate = (
             _speech(
@@ -296,13 +330,15 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             + f'<p class="more">{c["ydpa-head"]}</p>'
         )
         law = (
-            "<p>If the yes side holds 112 Seats, this is that path.</p>"
+            "<p>If the yes side has at least 112 votes in this all-222-vote "
+            "play, this is that path.</p>"
             "<p>In this play, the Campus Vote Bill is now a law. The real "
             "voting age in this country was not changed here.</p>"
         )
         failed = (
-            "<p>If the yes side does not hold 112 Seats, this is that path.</p>"
-            "<p>The yes side did not reach 112 Seats. The Bill dies in the "
+            "<p>If the yes side does not have 112 votes in this all-222-vote "
+            "play, this is that path.</p>"
+            "<p>The yes side did not reach 112 votes. The Bill dies in the "
             "Dewan Rakyat. The rule stays as it is.</p>"
             "<p>The Minister has three choices:</p>"
             '<ol class="bill-choices">'
@@ -318,10 +354,10 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
             "There was no split.</p>"
             f'<p class="prose-claim">{c["undi18-age"]}</p>'
             f'<p class="prose-claim">{c["undi18-avr"]}</p>'
-            f'<p class="prose-claim">{c["undi18-two-thirds"]}</p>'
-            '<p class="more">Two-thirds of 222 Seats is 148. The Campus '
-            "Vote Bill in this play only needed 112, because it was not a "
-            "constitutional amendment.</p>"
+            '<p class="more">This play uses 112 because it counts all 222 MPs '
+            "as voting. Constitutional amendments can have a different "
+            "threshold. Two-thirds of 222 "
+            f"Seats is 148. {c['undi18-two-thirds']}</p>"
         )
         cont = "Continue"
         divide = "Divide the house"
@@ -361,7 +397,7 @@ def _bill_play(*, language: str, c: dict[str, str]) -> str:
       <p class="caveat">{fiction}</p>
       <p class="more">{stake}</p>
       <ol class="bill-path" aria-label="Bill path">
-        <li data-bill-chip="reading" data-on="true">{path[0]}</li>
+        <li data-bill-chip="reading" data-on="true" aria-current="step">{path[0]}</li>
         <li data-bill-chip="debate" data-on="false">{path[1]}</li>
         <li data-bill-chip="division" data-on="false">{path[2]}</li>
         <li data-bill-chip="senate" data-on="false">{path[3]}</li>
@@ -551,12 +587,19 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
             "Hansard names every Member as agreeing, disagreeing, abstaining "
             "or absent.",
         ),
+        "bill-vote-rule": claim(
+            "claim-bill-vote-rule",
+            CONSTITUTION_ARTICLE_62,
+            "Except where the Federal Constitution provides otherwise, each "
+            "House decides by a simple majority of Members voting, and absent "
+            "Members cannot vote.",
+        ),
         "assent": claim(
             "claim-royal-assent",
-            DEWAN_NEGARA_POWERS,
-            "If the Yang di-Pertuan Agong objects or 30 days pass without "
-            "royal assent, the bill is sent back to Parliament with a list "
-            "of suggested amendments.",
+            CONSTITUTION_ARTICLE_66,
+            "The Yang di-Pertuan Agong has 30 days to assent to a Bill. If "
+            "it is not assented to within that period, it becomes law as if "
+            "assent had been given.",
         ),
         "senate-70": claim(
             "claim-senate-70",
@@ -589,13 +632,6 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
             "budget, he must either advise the King to dissolve Parliament "
             "and hold a general election or submit his resignation to the "
             "King.",
-        ),
-        "judiciary": claim(
-            "claim-judiciary",
-            POLITICS_JUDICIAL,
-            "The judiciary is theoretically independent of the executive "
-            "and the legislature, although supporters of the government "
-            "hold many judicial positions.",
         ),
         "undi18-two-thirds": claim(
             "claim-undi18-two-thirds",
@@ -659,20 +695,51 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
         ),
     }
     bar = _ge15_bar(stack_bar, colors)
+    color_style = _color_style(colors)
+    place_next = _journey_next(
+        eyebrow="Next on PolitikKu",
+        title="Find your Seat",
+        href="/#find",
+        description="Enter your postcode, or browse all 222 Seats on the map.",
+        links=(("/app/", "Explore the Seat map"),),
+    )
+    seat_next = _journey_next(
+        eyebrow="From one Seat to the national count",
+        title="Meet the Coalitions",
+        href="/learn/coalitions.html",
+        description="See how PH, BN, PN, GPS and GRS fit into the Seat count.",
+        links=(("/learn/glossary.html#term-seat", "Read the Seat definition"),),
+    )
+    majority_next = _journey_next(
+        eyebrow="From the teaching house to the current estimate",
+        title="Read the GE16 Projection",
+        href="/projection/",
+        description="See the Seat Calls behind the projected Majority and the model caveat beside them.",
+        links=(("/learn/glossary.html#term-majority", "Read the Majority definition"),),
+    )
+    bill_next = _journey_next(
+        eyebrow="From the teaching Bill to the public record",
+        title="Follow current Bills",
+        href="/bills/",
+        description="Read each Bill's current parliamentary stage and its source.",
+        links=(
+            ("/dewan/", "Explore Dewan Rakyat activity"),
+            ("/learn/ge16-process.html", "See the GE16 process"),
+        ),
+    )
     return f"""
-<div class="pk-scroll">
-  <nav class="act-nav" aria-label="Plays">
-    <a href="#play-1">1 · Place</a>
-    <a href="#play-2">2 · Seat</a>
-    <a href="#play-3">3 · Majority</a>
-    <a href="#play-4">4 · Bill</a>
-    <a href="#play-compass">Compass</a>
-  </nav>
-
+<div class="pk-scroll" style="{color_style}">
   <section class="scene" id="open">
     <div class="pk-eyebrow">Four short plays</div>
     <h1>Where does a vote go?</h1>
     <p class="line">Into a Seat. Then a Majority. Then a Bill.</p>
+    <nav class="act-nav" aria-label="Plays">
+      <a href="#play-1">1 · Place</a>
+      <a href="#play-2">2 · Seat</a>
+      <a href="#play-3">3 · Majority</a>
+      <a href="#play-4">4 · Bill</a>
+      <a href="#play-compass">Compass</a>
+    </nav>
   </section>
   <section class="scene" id="play-1">
     <div class="pk-eyebrow">01 · Your place</div>
@@ -698,6 +765,7 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <summary>Why two rolls</summary>
       <p>{c["two-rolls"]}</p>
     </details>
+    {place_next}
   </section>
 
   <section class="scene" id="play-2">
@@ -707,9 +775,9 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
     <div class="race" id="vote-race">
       <p class="more">This Seat is made up. Tap who wins.</p>
       <div class="race-picks">
-        <button type="button" data-race="amina">Amina · 4,200</button>
-        <button type="button" data-race="rizal">Rizal · 5,100</button>
-        <button type="button" data-race="siti">Siti · 3,900</button>
+        <button type="button" data-race="amina" aria-pressed="false">Amina · 4,200</button>
+        <button type="button" data-race="rizal" aria-pressed="false">Rizal · 5,100</button>
+        <button type="button" data-race="siti" aria-pressed="false">Siti · 3,900</button>
       </div>
       <p class="sim-status" data-race-result data-state="warn">Three people. One Seat. Tap a name.</p>
     </div>
@@ -717,6 +785,7 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <summary>Why this count</summary>
       <p>{c["westminster"]} Government is built from Seats, not from adding every vote nationwide.</p>
     </details>
+    {seat_next}
   </section>
 
   <section class="scene" id="play-3">
@@ -773,6 +842,7 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <p>{c["ge13-bn"]} {c["ge13-pr"]}</p>
       <p>{c["ph-founded"]} {c["gps-founded"]} {c["pn-founded"]} {c["grs-founded"]}</p>
     </details>
+    {majority_next}
   </section>
 
   <section class="scene" id="play-4">
@@ -784,13 +854,12 @@ def body_en(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <p>{c["bill"]}</p>
       <p>{c["division"]}</p>
       <p>{c["pm-practice"]}</p>
-      <p>{c["judiciary"]} This page stops there.</p>
     </details>
     <p class="finish">
       What GE16 projects on this site is the next Dewan Rakyat — 222 Seats,
       and whether a Coalition holds a Majority.
-      <a href="/learn/ge16-process.html">How GE16 is called</a>
     </p>
+    {bill_next}
   </section>
 
   <section class="scene" id="play-compass">
@@ -978,12 +1047,20 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
             CONTEXT_MD,
             "Belah bahagian ialah undian yang dikira di Dewan Rakyat, di mana Hansard menamakan setiap Ahli sebagai setuju, tidak setuju, berkecuali atau tidak hadir.",
         ),
+        "bill-vote-rule": claim(
+            "claim-bill-vote-rule",
+            CONSTITUTION_ARTICLE_62,
+            "Kecuali jika Perlembagaan Persekutuan memperuntukkan selainnya, "
+            "setiap Dewan membuat keputusan dengan majoriti mudah Ahli yang "
+            "mengundi, dan Ahli yang tidak hadir tidak boleh mengundi.",
+        ),
         "assent": claim(
             "claim-royal-assent",
-            DEWAN_NEGARA_POWERS,
-            "Jika Yang di-Pertuan Agong membantah atau 30 hari berlalu tanpa "
-            "perkenan diraja, rang undang-undang dihantar kembali ke Parlimen "
-            "bersama senarai pindaan cadangan.",
+            CONSTITUTION_ARTICLE_66,
+            "Yang di-Pertuan Agong mempunyai 30 hari untuk memperkenankan "
+            "sesuatu Rang Undang-Undang. Jika ia tidak diperkenankan dalam "
+            "tempoh itu, ia menjadi undang-undang seolah-olah perkenan telah "
+            "diberikan.",
         ),
         "senate-70": claim(
             "claim-senate-70",
@@ -1014,13 +1091,6 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
             "beliau mesti menasihati Raja untuk membubarkan Parlimen dan "
             "mengadakan pilihan raya umum atau menyerahkan peletakan jawatan "
             "kepada Raja.",
-        ),
-        "judiciary": claim(
-            "claim-judiciary",
-            POLITICS_JUDICIAL,
-            "Badan kehakiman secara teori berasingan daripada eksekutif dan "
-            "badan perundangan, walaupun penyokong kerajaan memegang banyak "
-            "jawatan kehakiman.",
         ),
         "undi18-two-thirds": claim(
             "claim-undi18-two-thirds",
@@ -1084,20 +1154,51 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
         ),
     }
     bar = _ge15_bar(stack_bar, colors)
+    color_style = _color_style(colors)
+    place_next = _journey_next(
+        eyebrow="Seterusnya di PolitikKu",
+        title="Cari Kerusi anda",
+        href="/ms/#find",
+        description="Masukkan poskod anda, atau teroka kesemua 222 Kerusi pada peta.",
+        links=(("/app/", "Teroka peta Kerusi"),),
+    )
+    seat_next = _journey_next(
+        eyebrow="Daripada satu Kerusi kepada kiraan negara",
+        title="Kenali Gabungan",
+        href="/ms/learn/coalitions.html",
+        description="Lihat bagaimana PH, BN, PN, GPS dan GRS termasuk dalam kiraan Kerusi.",
+        links=(("/ms/learn/glossary.html#term-seat", "Baca takrif Kerusi"),),
+    )
+    majority_next = _journey_next(
+        eyebrow="Daripada dewan pengajaran kepada anggaran semasa",
+        title="Baca Unjuran PRU16",
+        href="/ms/projection/",
+        description="Lihat Keputusan Kerusi di sebalik Majoriti yang diunjurkan dan batas model di sisinya.",
+        links=(("/ms/learn/glossary.html#term-majority", "Baca takrif Majoriti"),),
+    )
+    bill_next = _journey_next(
+        eyebrow="Daripada Rang Undang-Undang pengajaran kepada rekod awam",
+        title="Ikuti Rang Undang-Undang semasa",
+        href="/bills/",
+        description="Baca peringkat semasa setiap Rang Undang-Undang dan sumbernya.",
+        links=(
+            ("/dewan/", "Teroka aktiviti Dewan Rakyat"),
+            ("/ms/learn/ge16-process.html", "Lihat proses PRU16"),
+        ),
+    )
     return f"""
-<div class="pk-scroll">
-  <nav class="act-nav" aria-label="Permainan">
-    <a href="#play-1">1 · Tempat</a>
-    <a href="#play-2">2 · Kerusi</a>
-    <a href="#play-3">3 · Majoriti</a>
-    <a href="#play-4">4 · Rang undang-undang</a>
-    <a href="#play-compass">Kompas</a>
-  </nav>
-
+<div class="pk-scroll" style="{color_style}">
   <section class="scene" id="open">
     <div class="pk-eyebrow">Empat permainan pendek</div>
     <h1>Ke mana undi pergi?</h1>
     <p class="line">Ke suatu Kerusi. Kemudian suatu Majoriti. Kemudian suatu Rang Undang-Undang.</p>
+    <nav class="act-nav" aria-label="Permainan">
+      <a href="#play-1">1 · Tempat</a>
+      <a href="#play-2">2 · Kerusi</a>
+      <a href="#play-3">3 · Majoriti</a>
+      <a href="#play-4">4 · Rang undang-undang</a>
+      <a href="#play-compass">Kompas</a>
+    </nav>
   </section>
   <section class="scene" id="play-1">
     <div class="pk-eyebrow">01 · Tempat anda</div>
@@ -1123,6 +1224,7 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <summary>Mengapa dua daftar</summary>
       <p>{c["two-rolls"]}</p>
     </details>
+    {place_next}
   </section>
 
   <section class="scene" id="play-2">
@@ -1132,9 +1234,9 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
     <div class="race" id="vote-race">
       <p class="more">Kerusi ini dibuat-buat. Ketik siapa menang.</p>
       <div class="race-picks">
-        <button type="button" data-race="amina">Amina · 4,200</button>
-        <button type="button" data-race="rizal">Rizal · 5,100</button>
-        <button type="button" data-race="siti">Siti · 3,900</button>
+        <button type="button" data-race="amina" aria-pressed="false">Amina · 4,200</button>
+        <button type="button" data-race="rizal" aria-pressed="false">Rizal · 5,100</button>
+        <button type="button" data-race="siti" aria-pressed="false">Siti · 3,900</button>
       </div>
       <p class="sim-status" data-race-result data-state="warn">Tiga orang. Satu Kerusi. Ketik satu nama.</p>
     </div>
@@ -1142,6 +1244,7 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <summary>Mengapa kiraan ini</summary>
       <p>{c["westminster"]} Kerajaan dibina daripada Kerusi, bukan daripada jumlah setiap undi di seluruh negara.</p>
     </details>
+    {seat_next}
   </section>
 
   <section class="scene" id="play-3">
@@ -1198,6 +1301,7 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <p>{c["ge13-bn"]} {c["ge13-pr"]}</p>
       <p>{c["ph-founded"]} {c["gps-founded"]} {c["pn-founded"]} {c["grs-founded"]}</p>
     </details>
+    {majority_next}
   </section>
 
   <section class="scene" id="play-4">
@@ -1209,13 +1313,12 @@ def body_ms(claim: ClaimFn, stack_bar: StackFn, colors: dict[str, str]) -> str:
       <p>{c["bill"]}</p>
       <p>{c["division"]}</p>
       <p>{c["pm-practice"]}</p>
-      <p>{c["judiciary"]} Laman ini berhenti di situ.</p>
     </details>
     <p class="finish">
       Apa yang PRU16 unjurkan di laman ini ialah Dewan Rakyat yang seterusnya
       — 222 Kerusi, dan sama ada suatu Gabungan memegang Majoriti.
-      <a href="/ms/learn/ge16-process.html">Bagaimana PRU16 diisytiharkan</a>
     </p>
+    {bill_next}
   </section>
 
   <section class="scene" id="play-compass">

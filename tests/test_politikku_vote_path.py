@@ -1,6 +1,7 @@
 from datetime import date
 from pathlib import Path
 
+from lpa.coalition_colors import party_color
 from lpa.config import load_election_status
 from lpa.politikku_shell import NAV_LINKS, Language
 from lpa.politikku_vote_path import PAGE_PATH, build_vote_path_page, write_vote_path_pages
@@ -21,7 +22,10 @@ def test_vote_path_is_scrollcraft_and_in_nav() -> None:
     en, ms = _pages()
     for page in (en, ms):
         assert "<!doctype html>" in page
-        assert 'class="pk-bare"' in page
+        assert 'class="pk-bare"' not in page
+        assert 'id="sidebar"' in page
+        assert 'id="topbar"' in page
+        assert 'id="sb-vote-path" class="sb-item on"' in page
         assert 'class="scene"' in page
         assert 'class="split-card"' in page
         assert 'id="play-4"' in page
@@ -31,6 +35,7 @@ def test_vote_path_is_scrollcraft_and_in_nav() -> None:
         assert "Putrajaya" in page
     assert "Where does a vote go?" in en
     assert "Ke mana undi pergi?" in ms
+    assert en.index("<h1>Where does a vote go?</h1>") < en.index('<nav class="act-nav"')
     assert any(link.key == "vote-path" and link.href == PAGE_PATH for link in NAV_LINKS)
 
 
@@ -66,6 +71,44 @@ def test_vote_path_is_four_plays() -> None:
     assert 'id="course-board"' not in en
     assert "data-proto-switch" not in en
     assert "You are watching" in en
+    assert "This play assumes all 222 MPs vote" in en
+    assert "it becomes law as if assent had been given" in en
+    assert "sent back to Parliament with a list" not in en
+    assert 'aria-current="step"' in en
+
+
+def test_vote_path_connects_each_play_to_the_rest_of_the_site() -> None:
+    en, ms = _pages()
+    for href in (
+        "/#find",
+        "/app/",
+        "/learn/coalitions.html",
+        "/learn/glossary.html#term-seat",
+        "/projection/",
+        "/learn/glossary.html#term-majority",
+        "/bills/",
+        "/dewan/",
+        "/learn/ge16-process.html",
+    ):
+        assert f'href="{href}"' in en
+    for href in (
+        "/ms/#find",
+        "/app/",
+        "/ms/learn/coalitions.html",
+        "/ms/learn/glossary.html#term-seat",
+        "/ms/projection/",
+        "/ms/learn/glossary.html#term-majority",
+        "/bills/",
+        "/dewan/",
+        "/ms/learn/ge16-process.html",
+    ):
+        assert f'href="{href}"' in ms
+
+
+def test_vote_path_uses_the_shared_coalition_colors() -> None:
+    en, _ = _pages()
+    for code in ("PH", "PN", "BN", "GPS", "GRS"):
+        assert f"--vote-{code.lower()}:{party_color(code)}" in en
 
 
 def test_en_and_ms_are_different_copy() -> None:
@@ -76,6 +119,8 @@ def test_en_and_ms_are_different_copy() -> None:
     assert "Rang Undang-Undang Undi Kampus" in ms
     assert "Buka Rang Undang-Undang yang gagal" in ms
     assert "Open the failed bill" not in ms
+    assert "belah bahagian" in ms.lower()
+    assert "seolah-olah perkenan telah diberikan" in ms
     assert en.count("data-claim") == ms.count("data-claim")
     assert en.count("data-claim") >= 20
 
@@ -94,6 +139,12 @@ def test_vote_path_js_is_tracked() -> None:
     assert "course-board" not in text
     assert "initCourseBoard" not in text
     assert "js-ready" in text
+    assert "COLORS" not in text
+    assert "#d7263d" not in text
+    assert 'btn.setAttribute("aria-pressed", "true")' in text
+    assert 'el.setAttribute("aria-current", "step")' in text
+    assert "show(false)" in text
+    assert "if (panel && shouldFocus)" in text
 
 
 def test_write_vote_path_pages(tmp_path) -> None:

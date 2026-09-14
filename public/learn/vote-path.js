@@ -6,14 +6,6 @@
   var TOTAL = 222;
   var MAJORITY = 112;
   var CODES = ["PH", "PN", "BN", "GPS", "GRS", "OTHER"];
-  var COLORS = {
-    PH: "#d7263d",
-    PN: "#15387c",
-    BN: "#1f9bd6",
-    GPS: "#b8332e",
-    GRS: "#e8772e",
-    OTHER: "#5d6b7d",
-  };
   var YEARS = {
     ge13: {
       seats: { PH: 0, PN: 0, BN: 133, GPS: 0, GRS: 0, OTHER: 89 },
@@ -40,6 +32,10 @@
     return lang() === "ms" ? ms : en;
   }
 
+  function color(code) {
+    return "var(--vote-" + code.toLowerCase() + ")";
+  }
+
   function initRace() {
     var root = document.getElementById("vote-race");
     if (!root) return;
@@ -50,8 +46,10 @@
       var pick = btn.getAttribute("data-race");
       root.querySelectorAll("[data-race]").forEach(function (el) {
         el.removeAttribute("data-on");
+        el.setAttribute("aria-pressed", "false");
       });
       btn.setAttribute("data-on", "true");
+      btn.setAttribute("aria-pressed", "true");
       if (pick === "rizal") {
         result.dataset.state = "pass";
         result.textContent = t(
@@ -110,7 +108,7 @@
       for (var i = 0; i < n; i += 1) {
         dots.push(
           '<i class="sim-dot" style="background:' +
-            COLORS[code] +
+            color(code) +
             '" title="' +
             code +
             '"></i>',
@@ -130,7 +128,7 @@
         '<span class="stack-seg" style="width:' +
         ((n / TOTAL) * 100).toFixed(2) +
         "%;background:" +
-        COLORS[code] +
+        color(code) +
         '" title="' +
         code +
         " " +
@@ -175,8 +173,8 @@
     if (govSeats >= MAJORITY) {
       status.dataset.state = "pass";
       status.textContent = t(
-        "You have a Majority (" + govSeats + "). A Bill can pass a Division if these Seats vote yes.",
-        "Anda ada Majoriti (" + govSeats + "). Rang Undang-Undang boleh lulus suatu Bahagian jika Kerusi ini mengundi ya.",
+        "You have a Majority (" + govSeats + "). In this teaching house, that side holds more than half of all 222 Seats.",
+        "Anda ada Majoriti (" + govSeats + "). Dalam dewan pengajaran ini, pihak itu memegang lebih separuh daripada semua 222 Kerusi.",
       );
     } else {
       status.dataset.state = "hung";
@@ -216,7 +214,7 @@
         for (var i = 0; i < n; i += 1) {
           html +=
             '<i class="sim-dot" style="background:' +
-            COLORS[code] +
+            color(code) +
             '" title="' +
             code +
             '"></i>';
@@ -232,8 +230,8 @@
   }
 
   function readBillHouse(force) {
-    var lime = "#d6ed9a";
-    var mute = "#94aaa2";
+    var lime = "var(--accent)";
+    var mute = "var(--ink-faint)";
     if (force === "fail") {
       return { yes: 82, no: 140, yesSeats: null, noSeats: null, lime: lime, mute: mute, kind: "fail" };
     }
@@ -338,27 +336,27 @@
       if (live) {
         live.textContent = passed
           ? t(
-              "Yes " + h.yes + ". No " + h.no + ". Majority is 112. The Bill passes this house.",
-              "Ya " + h.yes + ". Tidak " + h.no + ". Majoriti ialah 112. Rang Undang-Undang lulus dewan ini.",
+              "Yes " + h.yes + ". No " + h.no + ". This play counts all 222 MPs, so 112 yes votes pass the Bill.",
+              "Ya " + h.yes + ". Tidak " + h.no + ". Permainan ini mengira semua 222 Ahli Parlimen, jadi 112 undi ya meluluskan Rang Undang-Undang.",
             )
           : t(
-              "Yes " + h.yes + ". No " + h.no + ". Majority is 112. The Bill dies in this house.",
-              "Ya " + h.yes + ". Tidak " + h.no + ". Majoriti ialah 112. Rang Undang-Undang mati di dewan ini.",
+              "Yes " + h.yes + ". No " + h.no + ". This play counts all 222 MPs, so the Bill does not have more votes.",
+              "Ya " + h.yes + ". Tidak " + h.no + ". Permainan ini mengira semua 222 Ahli Parlimen, jadi Rang Undang-Undang tidak mendapat undi lebih.",
             );
       }
       return passed;
     }
 
-    function show() {
+    function show(shouldFocus) {
       root.querySelectorAll("[data-bill-stage]").forEach(function (el) {
         el.classList.toggle("is-on", el.getAttribute("data-bill-stage") === stage);
       });
       var chip = CHIP[stage] || "end";
       root.querySelectorAll("[data-bill-chip]").forEach(function (el) {
-        el.setAttribute(
-          "data-on",
-          el.getAttribute("data-bill-chip") === chip ? "true" : "false",
-        );
+        var isCurrent = el.getAttribute("data-bill-chip") === chip;
+        el.setAttribute("data-on", isCurrent ? "true" : "false");
+        if (isCurrent) el.setAttribute("aria-current", "step");
+        else el.removeAttribute("aria-current");
       });
       if (stage === "division" && !divided) paintPool();
       if (next) {
@@ -373,7 +371,7 @@
       if (failBtn) failBtn.hidden = stage !== "law";
       if (passBtn) passBtn.hidden = stage !== "failed";
       var panel = root.querySelector('[data-bill-stage="' + stage + '"]');
-      if (panel && document.documentElement.classList.contains("js-ready")) {
+      if (panel && shouldFocus) {
         panel.focus();
       }
     }
@@ -383,7 +381,7 @@
         if (stage === "division" && !divided) {
           divided = true;
           splitFloor();
-          show();
+          show(true);
           return;
         }
         if (stage === "reading") stage = "gov";
@@ -397,7 +395,7 @@
         else if (stage === "assent") stage = "law";
         else if (stage === "law") stage = "coda";
         else if (stage === "failed") stage = "coda";
-        show();
+        show(true);
       });
     }
     if (failBtn) {
@@ -406,7 +404,7 @@
         divided = true;
         stage = "failed";
         splitFloor();
-        show();
+        show(true);
       });
     }
     if (passBtn) {
@@ -415,10 +413,10 @@
         divided = true;
         stage = "senate";
         splitFloor();
-        show();
+        show(true);
       });
     }
-    show();
+    show(false);
   }
 
   function initCompass() {

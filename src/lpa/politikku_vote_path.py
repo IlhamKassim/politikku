@@ -22,21 +22,15 @@ from datetime import date
 from html import escape
 from pathlib import Path
 
+from lpa.coalition_colors import party_color
 from lpa.config import load_election_status
 from lpa.domain import ElectionStatus
-from lpa.politikku_shell import Language, landing_url, render_shell, route, t
+from lpa.politikku_shell import Language, render_shell, t
 from lpa.politikku_vote_path_plays import body_en, body_ms
 
 PAGE_PATH = "learn/how-a-vote-works/"
 
-_CHART_COLORS = {
-    "PH": "#d7263d",
-    "PN": "#15387c",
-    "BN": "#1f9bd6",
-    "GPS": "#b8332e",
-    "GRS": "#e8772e",
-    "OTHER": "#5d6b7d",
-}
+_CHART_COLORS = {code: party_color(code) for code in ("PH", "PN", "BN", "GPS", "GRS", "OTHER")}
 MAJORITY_SEATS = 112
 DEWAN_SEATS = 222
 
@@ -351,11 +345,11 @@ _SCROLL_CSS = """
     color: #fff;
     font-weight: 600;
   }
-  .compass-dot[data-c="PH"] { left: 30%; top: 34%; background: #d7263d; }
-  .compass-dot[data-c="BN"] { left: 58%; top: 36%; background: #1f9bd6; }
-  .compass-dot[data-c="PN"] { left: 82%; top: 30%; background: #15387c; }
-  .compass-dot[data-c="GPS"] { left: 62%; top: 70%; background: #b8332e; }
-  .compass-dot[data-c="GRS"] { left: 42%; top: 78%; background: #e8772e; }
+  .compass-dot[data-c="PH"] { left: 30%; top: 34%; background: var(--vote-ph); }
+  .compass-dot[data-c="BN"] { left: 58%; top: 36%; background: var(--vote-bn); }
+  .compass-dot[data-c="PN"] { left: 82%; top: 30%; background: var(--vote-pn); }
+  .compass-dot[data-c="GPS"] { left: 62%; top: 70%; background: var(--vote-gps); }
+  .compass-dot[data-c="GRS"] { left: 42%; top: 78%; background: var(--vote-grs); }
   .compass-you {
     background: var(--accent);
     color: #102018;
@@ -484,6 +478,7 @@ _SCROLL_CSS = """
     padding: 0;
     border: 0;
     background: transparent;
+    max-width: 66ch;
   }
   .bill-play > .more, .bill-play > .caveat { margin-top: 12px; max-width: 62ch; }
   .bill-path {
@@ -656,29 +651,46 @@ _SCROLL_CSS = """
     background: var(--positive-bg);
     max-width: 62ch;
   }
+  .journey-next {
+    margin-top: 20px;
+    padding: 18px 20px;
+    max-width: 62ch;
+    border: 1px solid var(--line);
+    background: var(--paper-alt);
+  }
+  .journey-next .pk-eyebrow { color: var(--accent); }
+  .journey-next h3 {
+    margin: 8px 0 6px;
+    font-size: 22px;
+    line-height: 1.25;
+  }
+  .journey-next h3 a { color: var(--ink); text-decoration: none; }
+  .journey-next h3 a:hover { color: var(--accent); }
+  .journey-next p {
+    margin: 0;
+    max-width: 58ch;
+    color: var(--ink-secondary);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .journey-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 14px;
+  }
+  .journey-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-decoration: none;
+  }
+  .journey-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
 """.strip()
-
-
-def _header(language: Language) -> str:
-    home = landing_url(language)
-    en_href = route(Language.EN, PAGE_PATH)
-    ms_href = route(Language.MS, PAGE_PATH)
-    en_on = ' class="on"' if language is Language.EN else ""
-    ms_on = ' class="on"' if language is Language.MS else ""
-    en_cur = ' aria-current="page"' if language is Language.EN else ""
-    ms_cur = ' aria-current="page"' if language is Language.MS else ""
-    title = t(language, "How a vote works", "Ke mana undi pergi")
-    find = t(language, "Find your Seat", "Cari kerusi anda")
-    return f"""<header class="pk-scroll-head">
-  <a class="pk-scroll-brand" href="{home}">PolitikKu<small>{title}</small></a>
-  <div class="pk-scroll-tools">
-    <div class="seg lang-seg sb-lang" role="group" aria-label="{t(language, "Language", "Bahasa")}">
-      <a{en_on} href="{en_href}"{en_cur} data-pk-set-lang="en">EN</a>
-      <a{ms_on} href="{ms_href}"{ms_cur} data-pk-set-lang="ms">BM</a>
-    </div>
-    <a class="pk-scroll-home" href="{home}">{find}</a>
-  </div>
-</header>"""
 
 
 def _body_en() -> str:
@@ -712,8 +724,6 @@ def build_vote_path_page(language: Language, updated_at: date, status: ElectionS
             f"{t(language, _body_en(), _body_ms())}\n"
             '<script src="/learn/vote-path.js" defer></script>'
         ),
-        chrome=False,
-        header_html=_header(language),
     )
 
 
