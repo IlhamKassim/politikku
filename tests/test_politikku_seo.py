@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from lpa.politikku_seo import (
     SITE_URL,
     get_metadata_for_mp,
@@ -32,6 +34,35 @@ def test_projection_dataset_json_ld() -> None:
     html = en.head_html()
     assert "projection.json" in html
     assert "projection.csv" in html
+
+
+def test_projection_dataset_has_recommended_fields() -> None:
+    """Search Console flags a Dataset with no `creator` as a non-critical issue."""
+    for language in (Language.EN, Language.MS):
+        dataset = next(
+            ld
+            for ld in get_metadata_for_section("projection", language).json_ld
+            if ld.get("@type") == "Dataset"
+        )
+        assert dataset["creator"] == {
+            "@type": "Organization",
+            "name": "PolitikKu",
+            "url": SITE_URL,
+        }
+        assert dataset["license"]
+        assert dataset["isAccessibleForFree"] is True
+
+
+def test_projection_dataset_date_modified() -> None:
+    en = get_metadata_for_section("projection", Language.EN, date(2026, 9, 15))
+    dataset = next(ld for ld in en.json_ld if ld.get("@type") == "Dataset")
+    assert dataset["dateModified"] == "2026-09-15"
+    assert '"dateModified": "2026-09-15"' in en.head_html()
+
+    # Omitted rather than guessed when no computed date is supplied.
+    plain = get_metadata_for_section("projection", Language.EN)
+    plain_dataset = next(ld for ld in plain.json_ld if ld.get("@type") == "Dataset")
+    assert "dateModified" not in plain_dataset
 
 
 def test_mp_profile_person_json_ld() -> None:

@@ -223,7 +223,7 @@ async def prerender_all_routes(
             for section in SECTIONS:
                 for lang in (Language.EN, Language.MS):
                     is_ms = lang is Language.MS
-                    metadata = get_metadata_for_section(section, lang)
+                    metadata = get_metadata_for_section(section, lang, computed_at)
 
                     await page.evaluate(
                         "({path, lang}) => window.__renderRoute(path, lang)",

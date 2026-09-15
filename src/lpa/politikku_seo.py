@@ -11,6 +11,7 @@ import functools
 import html
 import json
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,14 @@ from lpa.politikku_shell import Language
 
 SITE_URL = "https://politikku.my/"
 OG_IMAGE = f"{SITE_URL}og-image.png"
+
+# schema.org recommends `creator` on every Dataset; Search Console flags its
+# absence as a non-critical structured data issue.
+DATASET_CREATOR_LD: dict[str, Any] = {
+    "@type": "Organization",
+    "name": "PolitikKu",
+    "url": SITE_URL,
+}
 
 WEBSITE_LD: dict[str, Any] = {
     "@context": "https://schema.org",
@@ -92,8 +101,14 @@ def _urls_for(base_path: str) -> tuple[str, str]:
     return en_url, ms_url
 
 
-def get_metadata_for_section(section: str, language: Language) -> RouteMetadata:
-    """Return metadata for a top-level section: dewan, bills, politicians, sentiment, projection, methodology."""
+def get_metadata_for_section(
+    section: str, language: Language, dataset_date: date | None = None
+) -> RouteMetadata:
+    """Return metadata for a top-level section: dewan, bills, politicians, sentiment, projection, methodology.
+
+    `dataset_date` is the date the projection was computed; when given it becomes
+    the Dataset's `dateModified`.
+    """
     is_ms = language is Language.MS
     if section == "dewan":
         en_url, ms_url = _urls_for("dewan")
@@ -204,7 +219,9 @@ def get_metadata_for_section(section: str, language: Language) -> RouteMetadata:
             "@type": "Dataset",
             "name": "GE16 Seat-by-Seat Projection",
             "description": "Daily seat-level projection for all 222 Malaysian Parliamentary seats based on sentiment swing and baseline election results.",
+            "creator": DATASET_CREATOR_LD,
             "license": "https://creativecommons.org/licenses/by/4.0/",
+            "isAccessibleForFree": True,
             "distribution": [
                 {
                     "@type": "DataDownload",
@@ -218,6 +235,8 @@ def get_metadata_for_section(section: str, language: Language) -> RouteMetadata:
                 },
             ],
         }
+        if dataset_date is not None:
+            dataset_ld["dateModified"] = dataset_date.isoformat()
         return RouteMetadata(
             route_path="ms/projection/" if is_ms else "projection/",
             language=language,
