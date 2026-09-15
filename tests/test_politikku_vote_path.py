@@ -145,6 +145,17 @@ def test_vote_path_js_is_tracked() -> None:
     assert 'el.setAttribute("aria-current", "step")' in text
     assert "show(false)" in text
     assert "if (panel && shouldFocus)" in text
+    assert "ink-faint" not in text
+
+
+def test_vote_path_css_rules() -> None:
+    en, _ = _pages()
+    assert ".compass-you[hidden] { display: none; }" in en
+    from lpa.politikku_vote_path import _SCROLL_CSS
+
+    assert "pk-scroll-head" not in _SCROLL_CSS
+    assert "#101e23" not in _SCROLL_CSS
+    assert "#102018" not in _SCROLL_CSS
 
 
 def test_write_vote_path_pages(tmp_path) -> None:

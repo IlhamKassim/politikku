@@ -63,48 +63,6 @@ def _stack_bar(segments: tuple[tuple[str, int, str], ...]) -> str:
 
 
 _SCROLL_CSS = """
-  .pk-scroll-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px var(--gutter-mobile);
-    border-bottom: 1px solid var(--line-soft);
-  }
-  @media (min-width: 900px) {
-    .pk-scroll-head { padding: 16px var(--gutter-desktop); }
-  }
-  .pk-scroll-brand {
-    font-family: var(--font-display);
-    letter-spacing: -.02em;
-    color: inherit;
-    text-decoration: none;
-    font-size: 18px;
-  }
-  .pk-scroll-brand small {
-    display: block;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-secondary);
-    margin-top: 2px;
-  }
-  .pk-scroll-tools {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .pk-scroll-tools a.pk-scroll-home {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-decoration: none;
-  }
   .pk-scroll {
     max-width: 1080px;
     margin: 0 auto;
@@ -244,7 +202,6 @@ _SCROLL_CSS = """
   @media (max-width: 720px) {
     .split, .chamber-grid { grid-template-columns: 1fr; }
     .scene { min-height: 0; padding: 36px 0; }
-    .pk-scroll-head { flex-wrap: wrap; }
   }
   @media (prefers-reduced-motion: reduce) {
     .scene { min-height: 0; }
@@ -352,13 +309,14 @@ _SCROLL_CSS = """
   .compass-dot[data-c="GRS"] { left: 42%; top: 78%; background: var(--vote-grs); }
   .compass-you {
     background: var(--accent);
-    color: #102018;
+    color: var(--paper);
     border-color: var(--ink);
     z-index: 2;
     width: 36px;
     height: 36px;
     margin: -18px 0 0 -18px;
   }
+  .compass-you[hidden] { display: none; }
   .compass-tools {
     display: grid;
     gap: 10px;
@@ -545,7 +503,7 @@ _SCROLL_CSS = """
     margin: 0;
     padding: 12px 14px;
     border-left: 3px solid var(--accent);
-    background: #101e23;
+    background: var(--paper);
   }
   .bill-speech p { margin: 0; font-size: 16px; line-height: 1.5; }
   .bill-note, .bill-stage .more, .bill-stage .prose-claim {
@@ -558,7 +516,7 @@ _SCROLL_CSS = """
   .div-floor {
     margin-top: 16px;
     padding: 14px;
-    background: #101e23;
+    background: var(--paper);
     border: 1px solid var(--line);
   }
   .div-floor[data-split="false"] .div-yes,
@@ -592,7 +550,7 @@ _SCROLL_CSS = """
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: .12em;
-    color: #101e23;
+    color: var(--paper);
   }
   .div-floor .sim-chamber { margin-top: 0; max-width: none; }
   .div-live {
@@ -628,7 +586,7 @@ _SCROLL_CSS = """
   }
   .bill-continue {
     background: var(--accent);
-    color: #101e23;
+    color: var(--paper);
   }
   .bill-alt {
     background: transparent;

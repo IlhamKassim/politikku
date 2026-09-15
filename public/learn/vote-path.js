@@ -231,7 +231,7 @@
 
   function readBillHouse(force) {
     var lime = "var(--accent)";
-    var mute = "var(--ink-faint)";
+    var mute = "var(--muted)";
     if (force === "fail") {
       return { yes: 82, no: 140, yesSeats: null, noSeats: null, lime: lime, mute: mute, kind: "fail" };
     }

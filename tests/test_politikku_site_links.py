@@ -367,7 +367,7 @@ def test_the_language_toggle_on_every_page_reaches_the_other_language(rendered_s
                 assert _resolve(rendered_site, link).is_file(), (page_path, link)
             continue
         if page_path.parent.name == "how-a-vote-works":
-            # Scrollcraft walkthrough: chrome=False, own header, own pair.
+            # Scrollcraft walkthrough: language pair.
             assert set(toggles) == {
                 "/learn/how-a-vote-works/",
                 "/ms/learn/how-a-vote-works/",
